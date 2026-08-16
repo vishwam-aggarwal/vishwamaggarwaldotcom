@@ -1,6 +1,6 @@
 ---
-title: "The 3.8° You're Leaving on the Table"
-description: "Hobby servos aren't linear. Here's what 2,300+ measurements say about it, and the tool I built to fix it automatically."
+title: "Hobby Servo Motor Accuracy: The 3.8° You're Leaving on the Table"
+description: "Hobby servo motors aren't as accurate as their datasheet suggests. Here's what 2,300+ measurements say about the error, and the tool I built to correct it."
 pubDate: 2026-08-16
 tags: ["Robotics", "Embedded", "Control Theory"]
 draft: true
@@ -8,7 +8,7 @@ draft: true
 
 Every hobby-servo tutorial starts the same way: pulse width in, angle out, straight line between two points. Send it 1000µs, get 0°. Send it 2000µs, get 90°. Everything in between is assumed to fall exactly on the line connecting those two points. It's in the datasheets, it's in every beginner library, and it's wrong — not by a rounding error, but by degrees.
 
-I measured it. On one analog hobby servo, across 2,305 valid samples spanning its full mechanical range, the real pulse-to-angle curve bows away from that straight line by up to **3.8°**, averaging about 1.1° of error across the whole range. That's not noise — it's a real, repeatable, direction-independent nonlinearity baked into how these things are built.
+I measured it. On one analog hobby servo, across 2,305 valid samples spanning its full mechanical range, the real pulse-to-angle curve bows away from that straight line by up to **3.8°**, averaging about 1.1° of error across the whole range. That's not noise — it's a real, repeatable nonlinearity baked into how these things are built.
 
 <div class="chart-figure">
   <p class="chart-title">Measured servo response vs. the naive 2-point linear model</p>
@@ -56,19 +56,47 @@ I measured it. On one analog hobby servo, across 2,305 valid samples spanning it
 
 ## Why this happens
 
-Nothing about a hobby servo is built to be linear — it's built to be cheap and good enough for a control surface that a human eye is going to fine-tune with a trim knob anyway. Inside, a potentiometer (or, in cheaper units, whatever position sense the internal feedback loop uses) has its own tolerances and its own nonlinear response. The gear train has backlash — real, measurable slop between teeth, which means the servo's actual position depends on which direction it last moved *from*, not just where you told it to go. None of this shows up in a datasheet, because a datasheet gives you two points and a promise that everything between them is a straight line. It isn't.
+Nothing about a hobby servo is built to be linear — it's built to be cheap and good enough for a control surface a human eye trims with a knob anyway. Inside, a potentiometer (or, in cheaper units, whatever position sense the internal feedback loop uses) has its own tolerances and its own nonlinear response. The pulse-to-angle relationship that produces was never designed to be a straight line, and nothing in the servo corrects for it. None of this shows up in a datasheet, because a datasheet gives you two points and a promise that everything between them is a straight line. It isn't.
 
-For a human trimming a control surface by eye, none of this matters. For a robot doing closed-loop positioning, planning trajectories, or chaining several joints together, it matters a lot: an arm with three joints doesn't add up three single-digit-degree errors, it *compounds* them through the kinematic chain, and a "repeatable" point-to-point move might not repeat at all if backlash means the achieved angle depends on which direction you approached from.
+For a human trimming a control surface by eye, that's invisible. For a robot doing closed-loop positioning or chaining several joints together, it isn't: an arm with three joints doesn't add up three single-digit-degree errors, it *compounds* them through the kinematic chain, and a controller that assumes linearity is silently wrong at every angle except the two it happened to be calibrated against.
 
-## Does the backlash actually matter?
+There's a second, different effect worth naming up front so it doesn't get confused with the first: gear backlash, which makes the servo's actual position depend on which direction it last moved *from*, not just where you told it to go. Nonlinearity and backlash are separate problems with separate fixes. This article is mostly about the first one — a static error that a calibration table can genuinely correct. Backlash gets its own section, with a very different conclusion, near the end.
 
-Measuring the curve answers half the question. The other half — does the *direction-dependent* part of this (hysteresis, not just nonlinearity) actually affect real point-to-point moves — needed a different test: command the same target from two different starting positions (approaching from below, approaching from above) and see how much the achieved angle actually varies.
+## Turning measurement into a tool
 
-140 trials, 7 target pulse widths, 10 trials each, alternating which side the move approached from. Then the same test again with a simple compensation scheme: deliberately undershoot the target and re-approach from one consistent direction, rather than trusting whichever direction the previous move happened to leave the horn in.
+Measuring one servo by hand — jogging pulses, reading a protractor, logging numbers — is exactly the kind of slow, error-prone process that shouldn't need to happen more than once. So I built [Servo Calibrator](/projects/servo-calibrator/): a self-contained browser app that talks to an Arduino over [Web Serial](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API), with an AS5600 magnetic encoder on the servo's output shaft as ground truth instead of a protractor.
+
+One button — **Calibrate** — does the entire characterization:
+
+1. **Stall-scan outward from center, both directions**, to find the servo's *real* mechanical limits — not the datasheet's claimed range, its actual one. This uses a sliding-window net-delta check rather than a single-step one, because a mechanism visibly slows before it fully stops; a naive check false-triggers on that creep and finds the wrong endpoint.
+2. **Sweep the full range twice, once per direction**, and average the two sweeps into one table. A single one-direction sweep would carry its own small directional bias, so averaging up-sweep and down-sweep data gives the best single estimate of the servo's actual nonlinear curve. It does **not** eliminate backlash — a lookup table can only store one pulse value per angle, and backlash means the true value genuinely depends on which direction you're arriving from. More on that trade-off later.
+3. **Build a 20-point lookup table** — `{pulseUs, angleCentideg}` pairs — that a driver interpolates between at runtime instead of trusting the 2-point line.
+
+Because the same rig is already wired up, the same page doubles as a small live trajectory visualizer once calibration finishes — command a step, a repeating trapezoidal square wave, or a trajectory-free sine wave, and watch three rolling charts (position, velocity, error) plot the setpoint against the AS5600's measured actual. A live toggle switches the model driving the servo between the plain linear formula and the just-built table *mid-move*, so the accuracy difference isn't a number you take on faith — you watch it happen.
+
+Across the servos I've tested this against, the 20-point table cuts mean positioning error **2–6×** relative to the linear formula, for about 80 bytes of flash. That's a very cheap accuracy win for something that costs one automated pass per servo.
+
+## What broke when I pointed it at a second servo
+
+The tool was built and tuned against one analog servo. The first real run against a different, digital one broke immediately — a good reminder that "works on my hardware" and "works" are different claims.
+
+The low-limit stall scan drove straight to the hard safety floor without ever detecting a stall. Not a bug: this servo's real range (or its own internal pulse clamp) genuinely sat outside the bounds tuned for the first one. Widening the floor/ceiling constants fixed that part cleanly — but three real firmware bugs followed, each found by instrumenting and reading actual data rather than guessing:
+
+- **A blind delay before the first angle sample**, sized for the first servo's speed, that a faster digital servo could complete its entire commanded move inside — so the very first tracked sample was already wrong. Fixed by never delaying blind before angle tracking actually starts.
+- **The servo could sit at a commanded pulse with zero measurable movement, then snap most of the way there in one step** — long enough that even a generous settle-detection window returned before real motion started, corrupting 18 of 20 table points to exactly zero. Fixed by never sending one large pulse jump at all: every move, including the ones that used to be instantaneous, now ramps through the same small steps the sweep already used successfully.
+- **A single bad encoder reading could permanently corrupt the running angle accumulator** — one glitched sample silently poisoning every measurement after it, for the rest of the sweep. Fixed with a plausibility check that rejects an implausible single-step jump outright rather than trusting it, which only became safe to add once the fix above guaranteed every real step actually was small.
+
+None of these would have surfaced without a second, different piece of hardware to test against — which is its own small lesson: a calibration tool that's only ever been calibrated *once* hasn't proven very much about itself.
+
+## What calibration doesn't fix: living with backlash
+
+The table above corrects a static error: for a given pulse width, what angle does this servo actually produce. Backlash isn't static — the same pulse can produce two different angles depending on whether the servo is approaching from below or above, because of real mechanical slop in the gear train. A lookup table has no way to represent that; it stores one angle per pulse, not one per (pulse, approach-direction) pair. **This is not something Servo Calibrator fixes, and it can't be — you cannot calibrate away backlash with a static table.**
+
+So does it matter enough to worry about at all? I measured that too, separately: 140 trials, 7 target pulse widths, 10 trials each, alternating which side the move approached from. Then the same test again with a simple compensation *scheme* — deliberately undershoot the target and re-approach from one consistent direction every time, rather than trusting whichever direction the previous move happened to leave the horn in — to see whether an operational workaround, rather than a calibration fix, was worth building.
 
 <div class="chart-figure">
   <p class="chart-title">Positioning spread with and without directional compensation</p>
-  <svg viewBox="0 0 680 360" role="img" aria-label="Grouped bar chart of positioning spread (max minus min angle across 10 trials) at seven target pulse widths, comparing uncompensated direct approach against a compensated undershoot-and-reapproach scheme. At 600 microseconds, compensation reduces spread from 1.08 degrees to effectively zero; the effect shrinks toward the middle of the range and returns at the opposite extreme.">
+  <svg viewBox="0 0 680 360" role="img" aria-label="Grouped bar chart of positioning spread (max minus min angle across 10 trials) at seven target pulse widths, comparing uncompensated direct approach against a compensated undershoot-and-reapproach scheme. At 600 microseconds, compensation reduces spread from 1.08 degrees to effectively zero; the effect shrinks toward the middle of the range, and is a slight regression at 1800 microseconds.">
     <g stroke="var(--border)" stroke-width="1">
       <line x1="60" y1="320" x2="660" y2="320" />
       <line x1="60" y1="245" x2="660" y2="245" />
@@ -135,36 +163,12 @@ Measuring the curve answers half the question. The other half — does the *dire
   </details>
 </div>
 
-The pattern is the real finding: backlash isn't a flat tax across the range, it's worst near the mechanical extremes and nearly disappears in the middle. At 600µs, near this servo's low endpoint, the uncompensated spread was **1.08°** — a single consistent approach direction collapsed that to **0.00°** across all 10 trials. In the middle of the range (1500µs), there was almost nothing to fix in the first place. If you only ever tested your servo's midpoint, you'd conclude backlash doesn't matter. Test the extremes, and it very much does.
+The result is a mixed bag, not a clean win — which is itself the useful finding. Compensation helps a lot right at the low end of this servo's range (600µs: spread drops from **1.08°** to **0.00°** across all 10 trials) and does close to nothing in the middle, where backlash was already small to begin with (1500µs: 0.26° either way). At 1800µs it's actually slightly worse compensated (0.35° vs. 0.26°) — a reminder that a workaround tuned for one part of the range doesn't automatically generalize to the rest of it.
 
-## Turning measurement into a tool
-
-Measuring one servo by hand — jogging pulses, reading a protractor, logging numbers — is exactly the kind of slow, error-prone process that shouldn't need to happen more than once. So I built [Servo Calibrator](/projects/servo-calibrator/): a self-contained browser app that talks to an Arduino over [Web Serial](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API), with an AS5600 magnetic encoder on the servo's output shaft as ground truth instead of a protractor.
-
-One button — **Calibrate** — does the entire characterization:
-
-1. **Stall-scan outward from center, both directions**, to find the servo's *real* mechanical limits — not the datasheet's claimed range, its actual one. This uses a sliding-window net-delta check rather than a single-step one, because a mechanism visibly slows before it fully stops; a naive check false-triggers on that creep and finds the wrong endpoint.
-2. **Sweep the full range twice, once per direction**, and average the two sweeps into one table. This is the same trick that flattened the 600µs bar in the chart above — averaging up-sweep and down-sweep pulse↔angle data cancels out most of the direction-dependent hysteresis automatically, without needing to model backlash explicitly.
-3. **Build a 20-point lookup table** — `{pulseUs, angleCentideg}` pairs — that a driver interpolates between at runtime instead of trusting the 2-point line.
-
-Because the same rig is already wired up, the same page doubles as a small live trajectory visualizer once calibration finishes — command a step, a repeating trapezoidal square wave, or a trajectory-free sine wave, and watch three rolling charts (position, velocity, error) plot the setpoint against the AS5600's measured actual. A live toggle switches the model driving the servo between the plain linear formula and the just-built table *mid-move*, so the accuracy difference isn't a number you take on faith — you watch it happen.
-
-Across the servos I've tested this against, the 20-point table cuts mean positioning error **2–6×** relative to the linear formula, for about 80 bytes of flash. That's a very cheap accuracy win for something that costs one automated pass per servo.
-
-## What broke when I pointed it at a second servo
-
-The tool was built and tuned against one analog servo. The first real run against a different, digital one broke immediately — a good reminder that "works on my hardware" and "works" are different claims.
-
-The low-limit stall scan drove straight to the hard safety floor without ever detecting a stall. Not a bug: this servo's real range (or its own internal pulse clamp) genuinely sat outside the bounds tuned for the first one. Widening the floor/ceiling constants fixed that part cleanly — but three real firmware bugs followed, each found by instrumenting and reading actual data rather than guessing:
-
-- **A blind delay before the first angle sample**, sized for the first servo's speed, that a faster digital servo could complete its entire commanded move inside — so the very first tracked sample was already wrong. Fixed by never delaying blind before angle tracking actually starts.
-- **The servo could sit at a commanded pulse with zero measurable movement, then snap most of the way there in one step** — long enough that even a generous settle-detection window returned before real motion started, corrupting 18 of 20 table points to exactly zero. Fixed by never sending one large pulse jump at all: every move, including the ones that used to be instantaneous, now ramps through the same small steps the sweep already used successfully.
-- **A single bad encoder reading could permanently corrupt the running angle accumulator** — one glitched sample silently poisoning every measurement after it, for the rest of the sweep. Fixed with a plausibility check that rejects an implausible single-step jump outright rather than trusting it, which only became safe to add once the fix above guaranteed every real step actually was small.
-
-None of these would have surfaced without a second, different piece of hardware to test against — which is its own small lesson: a calibration tool that's only ever been calibrated *once* hasn't proven very much about itself.
+**Servo Calibrator doesn't implement this compensation, on purpose.** Building direction-aware behavior into the calibration layer means tracking approach history and never trusting a single most-recent-position read at face value — real added complexity, for a benefit that's concentrated at the mechanical extremes and inconsistent everywhere else. These are cheap hobby servos, not precision actuators. The honest engineering call was to measure backlash, document that it exists and roughly how large it is, and leave it there rather than build around it. If a specific application needs tighter repeatability at a specific target, the fix is the same one tested here — always approach that target from a consistent direction — applied deliberately at the application layer, not baked into every calibration.
 
 ## The boundary this tool draws on purpose
 
-Servo Calibrator deliberately stops at characterization. It doesn't ask about horn position, direction, or a logical zero — it always works in the servo's own physical frame. Turning a measured table into an actual motor driver (with the direction and mounting offset your specific installation needs) is left to the [Universal Interface Stack](/projects/universal-interface-stack/), the hardware-agnostic control stack this tool feeds into. That's a deliberate split: *how a servo actually behaves* is a property of the part, measured once; *how it's mounted in your robot* is a property of your build, and conflating the two just makes the calibration tool less reusable across projects.
+Servo Calibrator deliberately stops at characterization. It doesn't ask about horn position, direction, or a logical zero — it always works in the servo's own physical frame. Turning a measured table into an actual motor driver (with the mounting offset your specific installation needs) is left to the [Universal Interface Stack](/projects/universal-interface-stack/), the hardware-agnostic control stack this tool feeds into. That's a deliberate split: *how a servo actually behaves* is a property of the part, measured once; *how it's mounted in your robot* is a property of your build, and conflating the two just makes the calibration tool less reusable across projects.
 
-If you're driving hobby servos for anything more precise than a human trimming a control surface by eye — a robot arm, a gimbal, anything doing closed-loop positioning — measuring the real curve isn't a nice-to-have. It's a few minutes of automated characterization against a couple hundred bytes of flash, for an error reduction you can watch happen live on a chart.
+If you're driving hobby servo motors for anything more precise than a human trimming a control surface by eye — a robot arm, a gimbal, anything doing closed-loop positioning — measuring the real curve isn't a nice-to-have. It's a few minutes of automated characterization against a couple hundred bytes of flash, for an accuracy improvement you can watch happen live on a chart. Backlash, you live with.
