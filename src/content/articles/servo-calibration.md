@@ -3,7 +3,7 @@ title: "Hobby Servo Motor Accuracy: The 3.8° You're Leaving on the Table"
 description: "Hobby servo motors aren't as accurate as their datasheet suggests. Here's what 2,300+ measurements say about the error, and the tool I built to correct it."
 pubDate: 2026-08-16
 tags: ["Robotics", "Embedded", "Control Theory"]
-draft: true
+draft: false
 ---
 
 Every hobby-servo tutorial starts the same way: pulse width in, angle out, straight line between two points. Send it 1000µs, get 0°. Send it 2000µs, get 90°. Everything in between is assumed to fall exactly on the line connecting those two points. It's in the datasheets, it's in every beginner library, and it's wrong — not by a rounding error, but by degrees.
