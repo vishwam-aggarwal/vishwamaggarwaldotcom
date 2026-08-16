@@ -80,14 +80,12 @@ history of what shipped together vs. separately):
   environments) and in a local, gitignored `.env` — see `.env.example` if it
   ever needs to be recreated.
 
-**Still pending — a real content decision, not an engineering one:**
-`src/content/articles/servo-calibration.md` stays `draft: true`. It's
-restructured per the user's feedback (nonlinearity is the fix the calibration
-table provides; backlash is explicitly *not* fixed by it — that section moved
-to the end with a "we live with it, these are cheap hobby servos"
-conclusion) and is fully wired up (charts, comments, SEO/structured data) —
-it just hasn't had the user's final read-through. Don't flip it to
-`draft: false` without them saying so explicitly.
+- **`src/content/articles/servo-calibration.md` is published** (`draft: false`,
+  commit `95c2ab3`) — live at `/articles/servo-calibration/`. Published on the
+  user's explicit go-ahead ("push the article too, we'll fix it later")
+  *before* a final content read-through — if a future session is asked to
+  touch this article, know that its current live text hasn't had the
+  author's own final pass yet, separate from any code-level correctness.
 
 ## Local preview gotcha
 
