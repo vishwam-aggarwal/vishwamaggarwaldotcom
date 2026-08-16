@@ -61,6 +61,17 @@ that section moved to the end with a clear "we live with it, these are cheap
 hobby servos" conclusion). Still awaiting the user's final content review
 before publishing.
 
+**Free SEO pass** — also built and committed locally, not yet pushed:
+`@astrojs/sitemap` integration (generates `sitemap-index.xml`/`sitemap-0.xml`
+at build), `public/robots.txt` pointing at it, `public/og-image.png` (1200×630,
+rendered from `og-image.svg` via `sharp`, not checked into source — regenerate
+from the SVG if it ever needs to change), and `BaseLayout.astro` now emits a
+canonical link, `og:url`/`og:image`/`twitter:*` tags, and an optional
+`structuredData` prop (JSON-LD) — used for `Person` on the homepage and
+`BlogPosting` on article pages. Off-site steps (Google Search Console, Bing
+Webmaster Tools, sitemap submission) still need the user to do manually once
+this is pushed and live — those aren't things this repo can automate.
+
 ## Local preview gotcha
 
 To preview a `draft: true` article/route that the build filters out: flip

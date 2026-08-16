@@ -12,9 +12,25 @@ export async function getStaticPaths() {
 
 const { article } = Astro.props;
 const { Content } = await render(article);
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: article.data.title,
+  description: article.data.description,
+  datePublished: article.data.pubDate.toISOString(),
+  author: { '@type': 'Person', name: 'Vishwam Aggarwal', url: 'https://vishwamaggarwal.com' },
+  url: new URL(`/articles/${article.id}/`, 'https://vishwamaggarwal.com').toString(),
+};
 ---
 
-<BaseLayout title={article.data.title} description={article.data.description}>
+<BaseLayout
+  title={article.data.title}
+  description={article.data.description}
+  type="article"
+  pubDate={article.data.pubDate}
+  structuredData={articleSchema}
+>
   <a href="/articles/" style="color: var(--text-dim); text-decoration: none; font-size: 0.9rem;">&larr; All articles</a>
 
   <header class="article-header">
