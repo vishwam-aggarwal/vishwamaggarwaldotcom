@@ -71,14 +71,30 @@ history of what shipped together vs. separately):
   homepage, `BlogPosting` on articles) in `BaseLayout.astro`. Off-site steps
   (Search Console, Bing Webmaster Tools) still need the user to do manually —
   see the reminder above.
-- **Comments (Cusdis)** — `src/components/Comments.astro`, wired into the
-  article template. No user database: no login, just name + optional email +
-  comment text, held for moderation before appearing (Cusdis's default
-  behavior) with email notifications on. The Cusdis project
-  (`vishwamaggarwal.com`, App ID `d0b799f1-0fb3-4d3f-8b2a-9bda898d47c2`) is
-  set as `PUBLIC_CUSDIS_APP_ID` in Vercel's Environment Variables (all
-  environments) and in a local, gitignored `.env` — see `.env.example` if it
-  ever needs to be recreated.
+- **Comments (Cusdis backend, custom UI)** — `src/components/Comments.astro`,
+  wired into the article template. **Not** the Cusdis iframe embed —
+  that was tried first and dropped: its hosted widget has two real bugs
+  (neither fixable from outside it) — `data-theme="auto"`/`"dark"` never
+  actually rendered dark despite the page correctly reporting
+  `prefers-color-scheme: dark`, and the iframe was stuck at a small fixed
+  height with its own internal scrollbar instead of auto-resizing. Current
+  implementation calls Cusdis's public REST API directly
+  (`GET`/`POST https://cusdis.com/api/open/comments`, CORS-open, no
+  server-side captcha requirement either way) from a small vanilla-JS
+  `<script>`, rendering the list and the submit form entirely in the site's
+  own CSS — no iframe. Has an honeypot field for casual bots; the real spam
+  backstop is still the moderation queue (nothing shows without approval),
+  same as before. No user database: no login, just name + optional email +
+  comment text. The Cusdis project (`vishwamaggarwal.com`, App ID
+  `d0b799f1-0fb3-4d3f-8b2a-9bda898d47c2`) is set as `PUBLIC_CUSDIS_APP_ID` in
+  Vercel's Environment Variables (all environments) and in a local,
+  gitignored `.env` — see `.env.example` if it ever needs to be recreated.
+  Verified end-to-end against the live API with a real test submission
+  ("Test Reviewer" on the servo-calibration article) — it landed correctly
+  in the moderation queue. **That test comment is still sitting there
+  unapproved** — deleting it hit a native confirm() dialog that froze the
+  automation tab, so it was left for the user to delete manually from the
+  dashboard.
 
 - **`src/content/articles/servo-calibration.md` is published** (`draft: false`,
   commit `95c2ab3`) — live at `/articles/servo-calibration/`. Published on the
