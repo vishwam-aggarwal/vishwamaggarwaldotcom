@@ -3,6 +3,17 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with
 code in this repository.
 
+## ⏰ Reminder for next session
+
+The user asked to be reminded, next time Claude is opened in this repo, about
+the **off-site SEO steps** that only they can do (not automatable from this
+repo): verify the site in **Google Search Console** and **Bing Webmaster
+Tools** and submit `sitemap-index.xml` to each, plus the free-backlink ideas
+from that conversation (GitHub profile README, LinkedIn Featured section,
+cross-posting articles to dev.to/Hashnode with a canonical link back). Bring
+this up near the start of the conversation, once — don't keep repeating it
+every session after that.
+
 ## What this is
 
 Vishwam Aggarwal's personal site/portfolio — Astro, static output, deployed on
