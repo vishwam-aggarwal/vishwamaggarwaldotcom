@@ -12,9 +12,18 @@ const allArticles = await getCollection('articles', ({ data }) => !data.draft);
 const recentArticles = allArticles
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 3);
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Vishwam Aggarwal',
+  url: 'https://vishwamaggarwal.com',
+  jobTitle: 'Robotics & Embedded Systems Engineer',
+  sameAs: ['https://github.com/vishwam-aggarwal'],
+};
 ---
 
-<BaseLayout title="Vishwam Aggarwal">
+<BaseLayout title="Vishwam Aggarwal" structuredData={personSchema}>
   <section class="hero">
     <p class="kicker">Robotics &amp; Embedded Systems</p>
     <h1>Hi, I'm Vishwam Aggarwal.</h1>
