@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About" description="About Vishwam Aggarwal.">
+  <h1>About</h1>
+  <div class="about-body">
+    <!--
+      TODO(Vishwam): This bio is drafted from your GitHub activity as a starting
+      point — rewrite it in your own voice. Things worth adding: your background
+      (school/work), what got you into robotics, what you're currently focused on,
+      and anything you want recruiters or collaborators to know at a glance.
+    -->
+    <p>
+      I'm Vishwam Aggarwal, a robotics and embedded systems engineer. Most of my
+      work lives at the intersection of control theory and firmware: taking
+      the math for motor control, filtering, and trajectory generation, and
+      turning it into code that runs reliably on real hardware.
+    </p>
+    <p>
+      Lately that's meant building the <a href="/projects/universal-interface-stack/">Universal Interface Stack</a> —
+      a set of composable C++ interfaces for motors, encoders, trajectories, and
+      end-effectors, designed so the same application code can drive an ODrive
+      over CAN, an RC servo, or a pure simulation without changes. I'm using it
+      to build a 5-DOF robot arm, and building the tooling (like a
+      browser-based servo calibrator) to make hardware bring-up less painful
+      along the way.
+    </p>
+    <h2>What I work with</h2>
+    <p>
+      C++ for firmware and control code, Arduino and Raspberry Pi Pico for
+      embedded targets, MATLAB for control system design, and whatever's
+      needed at the tooling layer (Web Serial in the browser, for instance)
+      to make hardware easier to work with.
+    </p>
+    <h2>Get in touch</h2>
+    <p>
+      I'm reachable at <a href="mailto:vishwam.aggarwal@gmail.com">vishwam.aggarwal@gmail.com</a>,
+      or find my code on <a href="https://github.com/vishwam-aggarwal" target="_blank" rel="noopener noreferrer">GitHub</a>.
+    </p>
+  </div>
+</BaseLayout>

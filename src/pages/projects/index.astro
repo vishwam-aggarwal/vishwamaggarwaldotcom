@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+
+const allProjects = (await getCollection('projects')).sort(
+  (a, b) => a.data.order - b.data.order
+);
+---
+
+<BaseLayout title="Projects" description="Robotics and embedded systems projects by Vishwam Aggarwal.">
+  <h1>Projects</h1>
+  <p style="color: var(--text-dim); margin-bottom: 2rem;">
+    Mostly a hardware-agnostic control stack for robots, plus the embedded
+    drivers and control-theory libraries underneath it. Some repos are still
+    private while in active development — get in touch if you'd like a look.
+  </p>
+  <div class="project-grid">
+    {allProjects.map((project) => (
+      <ProjectCard
+        slug={project.id}
+        title={project.data.title}
+        summary={project.data.summary}
+        tags={project.data.tags}
+        status={project.data.status}
+        repo={project.data.repo}
+        demo={project.data.demo}
+      />
+    ))}
+  </div>
+</BaseLayout>

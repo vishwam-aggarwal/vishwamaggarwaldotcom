@@ -1,0 +1,72 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+
+const allProjects = await getCollection('projects');
+const featured = allProjects
+  .filter((p) => p.data.featured)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const allArticles = await getCollection('articles', ({ data }) => !data.draft);
+const recentArticles = allArticles
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+---
+
+<BaseLayout title="Vishwam Aggarwal">
+  <section class="hero">
+    <p class="kicker">Robotics &amp; Embedded Systems</p>
+    <h1>Hi, I'm Vishwam Aggarwal.</h1>
+    <p class="lede">
+      I build hardware-agnostic control systems for robots — from low-level motor,
+      encoder, and sensor drivers up through trajectory generation and motion
+      control. This site is where I write up what I'm building and why.
+    </p>
+    <div class="button-row">
+      <a class="btn primary" href="/projects/">View projects</a>
+      <a class="btn" href="/about/">About me</a>
+      <a class="btn" href="https://github.com/vishwam-aggarwal" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-heading">
+      <h2>Featured projects</h2>
+      <a href="/projects/">All projects &rarr;</a>
+    </div>
+    <div class="project-grid">
+      {featured.map((project) => (
+        <ProjectCard
+          slug={project.id}
+          title={project.data.title}
+          summary={project.data.summary}
+          tags={project.data.tags}
+          status={project.data.status}
+          repo={project.data.repo}
+          demo={project.data.demo}
+        />
+      ))}
+    </div>
+  </section>
+
+  {recentArticles.length > 0 && (
+    <section style="margin-top: 3.5rem;">
+      <div class="section-heading">
+        <h2>Recent articles</h2>
+        <a href="/articles/">All articles &rarr;</a>
+      </div>
+      <div class="article-list">
+        {recentArticles.map((article) => (
+          <div class="article-item">
+            <time datetime={article.data.pubDate.toISOString()}>
+              {article.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </time>
+            <h3><a href={`/articles/${article.id}/`}>{article.data.title}</a></h3>
+            <p>{article.data.description}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+</BaseLayout>

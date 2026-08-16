@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const articles = (await getCollection('articles', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<BaseLayout title="Articles" description="Research notes and write-ups by Vishwam Aggarwal.">
+  <h1>Articles</h1>
+  <p style="color: var(--text-dim); margin-bottom: 2rem;">
+    Write-ups on projects, research findings, and things I learned the hard way.
+  </p>
+
+  {articles.length === 0 ? (
+    <div class="empty-state">
+      <p>No articles published yet — check back soon.</p>
+    </div>
+  ) : (
+    <div class="article-list">
+      {articles.map((article) => (
+        <div class="article-item">
+          <time datetime={article.data.pubDate.toISOString()}>
+            {article.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </time>
+          <h3><a href={`/articles/${article.id}/`}>{article.data.title}</a></h3>
+          <p>{article.data.description}</p>
+        </div>
+      ))}
+    </div>
+  )}
+</BaseLayout>
