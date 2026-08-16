@@ -1,0 +1,41 @@
+---
+interface Props {
+  pageId: string;
+  pageUrl: string;
+  pageTitle: string;
+}
+
+const { pageId, pageUrl, pageTitle } = Astro.props;
+const appId = import.meta.env.PUBLIC_CUSDIS_APP_ID;
+---
+
+{appId ? (
+  <section class="comments-section">
+    <h2>Comments</h2>
+    <p class="chart-caption" style="margin-bottom: 1.25rem;">
+      Name and comment are public. Email is never shown or shared &mdash; it's
+      only used if I need to follow up. New comments are held for review
+      before they appear.
+    </p>
+    <div
+      id="cusdis_thread"
+      data-host="https://cusdis.com"
+      data-app-id={appId}
+      data-page-id={pageId}
+      data-page-url={pageUrl}
+      data-page-title={pageTitle}
+      data-theme="auto"
+    />
+    <script async defer src="https://cusdis.com/js/cusdis.es.js"></script>
+  </section>
+) : (
+  import.meta.env.DEV && (
+    <section class="comments-section">
+      <h2>Comments</h2>
+      <p class="chart-caption">
+        Comments are configured but <code>PUBLIC_CUSDIS_APP_ID</code> isn't set
+        &mdash; add it to <code>.env</code> (see <code>.env.example</code>) to preview them locally.
+      </p>
+    </section>
+  )
+)}
