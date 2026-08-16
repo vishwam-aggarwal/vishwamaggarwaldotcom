@@ -47,41 +47,47 @@ hosting Vishwam's own browser-based hardware apps directly on the site.
 - `src/styles/global.css` — all styling, light/dark via `prefers-color-scheme`
   only (no theme toggle on this site).
 
-## Currently in progress (pending, not yet pushed)
+## Status
 
-**Tools section + Servo Calibrator web app** — built and committed locally
-(commit `99109eb` on top of `master`), **not yet pushed to GitHub / not yet
-live**. Per the user: keep this local until told otherwise.
+As of commit `aa2e123`, everything below is **pushed to `master` and live in
+production** (the user authorized pushing everything at once while away from
+their computer — see git log for the individual commits if you need the
+history of what shipped together vs. separately):
 
-What's built: `/tools/`, `/tools/servo-calibrator/` (wiring schematic, safety
-notes, GitHub links), and the actual calibrator app hosted at
-`/tools/servo-calibrator/app/`.
+- **Tools section + Servo Calibrator web app** — `/tools/`,
+  `/tools/servo-calibrator/` (wiring schematic, safety notes, GitHub links),
+  and the actual calibrator app at `/tools/servo-calibrator/app/`. **Known
+  non-blocking issue:** the GitHub links on that page point at
+  `vishwam-aggarwal/Servo-Calibrator`, which is still **private** (and its
+  firmware depends on two more private repos,
+  `Universal-Motor-Interface`/`Universal-Trajectory-Interface`) — those links
+  currently 404 for visitors. The user explicitly deferred fixing this
+  ("we'll figure out how to give users access to the sketch later") — don't
+  flip any repo visibility without asking first.
+- **Free SEO pass** — `@astrojs/sitemap`, `public/robots.txt`,
+  `public/og-image.png` (1200×630, rendered from `og-image.svg` via `sharp`,
+  not checked into source — regenerate from the SVG if it ever needs to
+  change), canonical/`og:*`/`twitter:*` tags and JSON-LD (`Person` on the
+  homepage, `BlogPosting` on articles) in `BaseLayout.astro`. Off-site steps
+  (Search Console, Bing Webmaster Tools) still need the user to do manually —
+  see the reminder above.
+- **Comments (Cusdis)** — `src/components/Comments.astro`, wired into the
+  article template. No user database: no login, just name + optional email +
+  comment text, held for moderation before appearing (Cusdis's default
+  behavior) with email notifications on. The Cusdis project
+  (`vishwamaggarwal.com`, App ID `d0b799f1-0fb3-4d3f-8b2a-9bda898d47c2`) is
+  set as `PUBLIC_CUSDIS_APP_ID` in Vercel's Environment Variables (all
+  environments) and in a local, gitignored `.env` — see `.env.example` if it
+  ever needs to be recreated.
 
-**Blocking before this can go live for real visitors:** the GitHub links on
-the Servo Calibrator tools page point at `vishwam-aggarwal/Servo-Calibrator`,
-which is currently **private** — and its firmware depends on two more private
-repos (`Universal-Motor-Interface`, `Universal-Trajectory-Interface`). The
-user explicitly deferred this decision ("we'll figure out how to give users
-access to the sketch later, when we actually deploy this tool") — don't flip
-any repo visibility without asking again first.
-
-**Also pending:** `src/content/articles/servo-calibration.md` is drafted
-(`draft: true`) and restructured per user feedback (nonlinearity is the fix
-the calibration table provides; backlash is explicitly *not* fixed by it —
-that section moved to the end with a clear "we live with it, these are cheap
-hobby servos" conclusion). Still awaiting the user's final content review
-before publishing.
-
-**Free SEO pass** — also built and committed locally, not yet pushed:
-`@astrojs/sitemap` integration (generates `sitemap-index.xml`/`sitemap-0.xml`
-at build), `public/robots.txt` pointing at it, `public/og-image.png` (1200×630,
-rendered from `og-image.svg` via `sharp`, not checked into source — regenerate
-from the SVG if it ever needs to change), and `BaseLayout.astro` now emits a
-canonical link, `og:url`/`og:image`/`twitter:*` tags, and an optional
-`structuredData` prop (JSON-LD) — used for `Person` on the homepage and
-`BlogPosting` on article pages. Off-site steps (Google Search Console, Bing
-Webmaster Tools, sitemap submission) still need the user to do manually once
-this is pushed and live — those aren't things this repo can automate.
+**Still pending — a real content decision, not an engineering one:**
+`src/content/articles/servo-calibration.md` stays `draft: true`. It's
+restructured per the user's feedback (nonlinearity is the fix the calibration
+table provides; backlash is explicitly *not* fixed by it — that section moved
+to the end with a "we live with it, these are cheap hobby servos"
+conclusion) and is fully wired up (charts, comments, SEO/structured data) —
+it just hasn't had the user's final read-through. Don't flip it to
+`draft: false` without them saying so explicitly.
 
 ## Local preview gotcha
 
