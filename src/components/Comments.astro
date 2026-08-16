@@ -10,23 +10,42 @@ const appId = import.meta.env.PUBLIC_CUSDIS_APP_ID;
 ---
 
 {appId ? (
-  <section class="comments-section">
+  <section class="comments-section" id="comments" data-app-id={appId} data-page-id={pageId} data-page-url={pageUrl} data-page-title={pageTitle}>
     <h2>Comments</h2>
     <p class="chart-caption" style="margin-bottom: 1.25rem;">
       Name and comment are public. Email is never shown or shared &mdash; it's
       only used if I need to follow up. New comments are held for review
       before they appear.
     </p>
-    <div
-      id="cusdis_thread"
-      data-host="https://cusdis.com"
-      data-app-id={appId}
-      data-page-id={pageId}
-      data-page-url={pageUrl}
-      data-page-title={pageTitle}
-      data-theme="auto"
-    />
-    <script async defer src="https://cusdis.com/js/cusdis.es.js"></script>
+
+    <div id="comments-list" class="comments-list" aria-live="polite">
+      <p class="comments-status">Loading comments&hellip;</p>
+    </div>
+
+    <form id="comment-form" class="comment-form">
+      <div class="comment-form-row">
+        <div class="comment-field">
+          <label for="comment-nickname">Name</label>
+          <input id="comment-nickname" name="nickname" type="text" required maxlength="100" autocomplete="name" />
+        </div>
+        <div class="comment-field">
+          <label for="comment-email">Email <span class="comment-field-note">(optional, never shown)</span></label>
+          <input id="comment-email" name="email" type="email" maxlength="200" autocomplete="email" />
+        </div>
+      </div>
+      <div class="comment-field">
+        <label for="comment-content">Comment</label>
+        <textarea id="comment-content" name="content" rows="4" required maxlength="2000"></textarea>
+      </div>
+      <div class="comment-hp" aria-hidden="true">
+        <label for="comment-website">Website</label>
+        <input id="comment-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+      <div class="comment-form-footer">
+        <button type="submit" class="btn primary">Post comment</button>
+        <p id="comment-form-status" class="comments-status" role="status"></p>
+      </div>
+    </form>
   </section>
 ) : (
   import.meta.env.DEV && (
@@ -39,3 +58,101 @@ const appId = import.meta.env.PUBLIC_CUSDIS_APP_ID;
     </section>
   )
 )}
+
+<script>
+  const CUSDIS_HOST = 'https://cusdis.com';
+
+  function escapeText(str: string) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function formatDate(iso: string) {
+    return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  function renderComment(c: any, isReply = false) {
+    const replies = (c.replies?.data || []).map((r: any) => renderComment(r, true)).join('');
+    return `
+      <article class="comment-item${isReply ? ' comment-reply' : ''}">
+        <div class="comment-meta">
+          <span class="comment-author">${escapeText(c.by_nickname || 'Anonymous')}</span>
+          <time datetime="${c.createdAt}">${formatDate(c.createdAt)}</time>
+        </div>
+        <p class="comment-body">${escapeText(c.content).replace(/\n/g, '<br>')}</p>
+        ${replies ? `<div class="comment-replies">${replies}</div>` : ''}
+      </article>
+    `;
+  }
+
+  async function loadComments(section: HTMLElement) {
+    const listEl = section.querySelector('#comments-list') as HTMLElement;
+    const appId = section.dataset.appId!;
+    const pageId = section.dataset.pageId!;
+    try {
+      const res = await fetch(`${CUSDIS_HOST}/api/open/comments?appId=${encodeURIComponent(appId)}&pageId=${encodeURIComponent(pageId)}&page=1`);
+      if (!res.ok) throw new Error('bad response');
+      const json = await res.json();
+      const comments = json.data?.data || [];
+      if (comments.length === 0) {
+        listEl.innerHTML = '<p class="comments-status">No comments yet &mdash; be the first.</p>';
+        return;
+      }
+      listEl.innerHTML = comments.map((c: any) => renderComment(c)).join('');
+    } catch (e) {
+      listEl.innerHTML = '<p class="comments-status">Couldn\'t load comments right now.</p>';
+    }
+  }
+
+  function initCommentForm(section: HTMLElement) {
+    const form = section.querySelector('#comment-form') as HTMLFormElement;
+    const statusEl = section.querySelector('#comment-form-status') as HTMLElement;
+    const appId = section.dataset.appId!;
+    const pageId = section.dataset.pageId!;
+    const pageUrl = section.dataset.pageUrl!;
+    const pageTitle = section.dataset.pageTitle!;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+
+      // Honeypot: if filled, silently pretend success without submitting.
+      if ((data.get('website') as string)?.trim()) {
+        form.reset();
+        statusEl.textContent = 'Thanks! Your comment is awaiting approval.';
+        return;
+      }
+
+      const nickname = (data.get('nickname') as string || '').trim();
+      const email = (data.get('email') as string || '').trim();
+      const content = (data.get('content') as string || '').trim();
+      if (!nickname || !content) return;
+
+      const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      submitBtn.disabled = true;
+      statusEl.textContent = 'Posting…';
+
+      try {
+        const res = await fetch(`${CUSDIS_HOST}/api/open/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appId, pageId, pageUrl, pageTitle, nickname, email, content }),
+        });
+        if (!res.ok) throw new Error('bad response');
+        form.reset();
+        statusEl.textContent = 'Thanks! Your comment is awaiting approval before it appears.';
+      } catch (err) {
+        statusEl.textContent = "Something went wrong — mind trying again in a moment?";
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  const section = document.getElementById('comments');
+  if (section) {
+    loadComments(section);
+    initCommentForm(section);
+  }
+</script>
