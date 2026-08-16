@@ -49,11 +49,12 @@ hosting Vishwam's own browser-based hardware apps directly on the site.
 
 ## Status
 
-As of commit `aa2e123`, everything below is **pushed to `master` and live in
-production** (the user authorized pushing everything at once while away from
-their computer — see git log for the individual commits if you need the
-history of what shipped together vs. separately):
+Everything below is pushed to `master` and live in production:
 
+- **Header brand text** reads `VishwamAggarwal.com` (capital V, capital A) —
+  intentional, not a typo if you see it while editing `Header.astro`. The
+  favicon (`public/favicon.svg`) already rendered "VA" fully capitalized
+  before this change, so it needed no update to match.
 - **Tools section + Servo Calibrator web app** — `/tools/`,
   `/tools/servo-calibrator/` (wiring schematic, safety notes, GitHub links),
   and the actual calibrator app at `/tools/servo-calibrator/app/`. **Known
@@ -89,12 +90,13 @@ history of what shipped together vs. separately):
   `d0b799f1-0fb3-4d3f-8b2a-9bda898d47c2`) is set as `PUBLIC_CUSDIS_APP_ID` in
   Vercel's Environment Variables (all environments) and in a local,
   gitignored `.env` — see `.env.example` if it ever needs to be recreated.
-  Verified end-to-end against the live API with a real test submission
-  ("Test Reviewer" on the servo-calibration article) — it landed correctly
-  in the moderation queue. **That test comment is still sitting there
-  unapproved** — deleting it hit a native confirm() dialog that froze the
-  automation tab, so it was left for the user to delete manually from the
-  dashboard.
+  Verified end-to-end against the live API with a real test submission —
+  landed correctly in the moderation queue, since deleted by the user.
+  Cusdis's free plan caps the one-click "Approve" link in notification
+  emails at 10/month (`QuickApprove` in their source) — past that, approve
+  from the dashboard directly. Email Notification is on in the Cusdis
+  project settings, so the user learns about new comments by email either
+  way, not by checking the dashboard on a schedule.
 
 - **`src/content/articles/servo-calibration.md` is published** (`draft: false`,
   commit `95c2ab3`) — live at `/articles/servo-calibration/`. Published on the
