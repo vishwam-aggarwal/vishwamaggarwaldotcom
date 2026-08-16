@@ -1,0 +1,126 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const repoUrl = 'https://github.com/vishwam-aggarwal/Servo-Calibrator';
+const sketchUrl = `${repoUrl}/blob/main/ServoCalibrator_Companion/ServoCalibrator_Companion.ino`;
+---
+
+<BaseLayout
+  title="Servo Calibrator"
+  description="A browser-based tool that characterizes a hobby servo's real pulse↔angle curve with an AS5600 encoder, then lets you drive and visualize trajectories against it."
+>
+  <a href="/tools/" style="color: var(--text-dim); text-decoration: none; font-size: 0.9rem;">&larr; All tools</a>
+
+  <header class="article-header">
+    <div class="tag-row" style="margin-top: 1rem;">
+      <span class="status-badge">active</span>
+      <span class="tag">Web Serial</span>
+      <span class="tag">Robotics</span>
+      <span class="tag">Arduino</span>
+    </div>
+    <h1>Servo Calibrator</h1>
+  </header>
+
+  <p>
+    Hobby servos aren't as linear as the datasheet says &mdash; see
+    <a href="/articles/servo-calibration/">the write-up</a> for exactly how much.
+    This tool measures your specific servo's real pulse&harr;angle curve using an
+    AS5600 magnetic encoder as ground truth, builds a 20-point calibration table
+    automatically, and then lets you drive and watch live trajectories against it
+    &mdash; right here in the browser, no install.
+  </p>
+
+  <h2 style="margin-top: 2.5rem;">What you'll need</h2>
+  <ul style="color: var(--text-dim);">
+    <li>An Arduino-compatible board with I&sup2;C and a free PWM-capable pin (<code>A3</code> by default)</li>
+    <li>An AS5600 magnetic encoder breakout, with the magnet mounted on the servo's output shaft</li>
+    <li>The hobby servo you want to characterize, with a <strong>bare horn</strong> &mdash; no linkage or load attached</li>
+    <li>An external power supply for the servo, sized for its stall current</li>
+    <li>Chrome or Edge on desktop &mdash; Web Serial isn't implemented in Firefox or Safari</li>
+  </ul>
+
+  <figure class="chart-figure">
+    <svg viewBox="0 0 640 460" role="img" aria-label="Wiring diagram: the Arduino's A3 pin drives the servo signal line, its I2C bus (SDA/SCL) connects to the AS5600 breakout, the servo's power comes from an external supply rather than the Arduino's own 5V pin, and the Arduino, supply, and servo all share one common ground.">
+      <rect x="40" y="30" width="200" height="170" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.35" />
+      <text x="140" y="60" font-size="13" font-weight="600" fill="var(--text)" text-anchor="middle">Arduino</text>
+      <text x="140" y="78" font-size="10.5" fill="var(--text-faint)" text-anchor="middle">(Nano-compatible)</text>
+      <rect x="420" y="50" width="180" height="90" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.35" />
+      <text x="510" y="85" font-size="13" font-weight="600" fill="var(--text)" text-anchor="middle">AS5600 breakout</text>
+      <text x="510" y="102" font-size="10.5" fill="var(--text-faint)" text-anchor="middle">magnet on servo shaft</text>
+      <rect x="40" y="260" width="200" height="90" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.35" />
+      <text x="140" y="295" font-size="13" font-weight="600" fill="var(--text)" text-anchor="middle">External power supply</text>
+      <text x="140" y="312" font-size="10.5" fill="var(--text-faint)" text-anchor="middle">sized for servo stall current</text>
+      <rect x="420" y="260" width="180" height="110" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.35" />
+      <text x="510" y="300" font-size="13" font-weight="600" fill="var(--text)" text-anchor="middle">Servo</text>
+      <text x="510" y="317" font-size="10.5" fill="var(--text-faint)" text-anchor="middle">bare horn, no load</text>
+      <line x1="240" y1="105" x2="420" y2="275" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" />
+      <text x="345" y="187" font-size="10.5" fill="var(--text-dim)" text-anchor="middle">A3 &rarr; signal</text>
+      <line x1="240" y1="130" x2="420" y2="80" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" />
+      <text x="330" y="97" font-size="10.5" fill="var(--text-dim)" text-anchor="middle">SDA</text>
+      <line x1="240" y1="155" x2="420" y2="105" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" />
+      <text x="330" y="140" font-size="10.5" fill="var(--text-dim)" text-anchor="middle">SCL</text>
+      <line x1="240" y1="280" x2="420" y2="320" stroke="var(--accent)" stroke-width="2" />
+      <text x="330" y="270" font-size="10.5" fill="var(--accent)" text-anchor="middle">servo power</text>
+      <line x1="200" y1="200" x2="420" y2="320" stroke="var(--text-faint)" stroke-width="1.5" stroke-dasharray="4 4" />
+      <g stroke="var(--text-faint)" stroke-width="1.5">
+        <line x1="294" y1="230" x2="306" y2="242" />
+        <line x1="306" y1="230" x2="294" y2="242" />
+      </g>
+      <text x="300" y="222" font-size="10" fill="var(--text-faint)" text-anchor="middle">not the 5V pin</text>
+      <line x1="480" y1="254" x2="510" y2="140" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="2 4" />
+      <circle cx="480" cy="258" r="4" fill="none" stroke="currentColor" stroke-opacity="0.7" />
+      <text x="488" y="248" font-size="10" fill="var(--text-faint)" text-anchor="start">senses through air gap</text>
+      <line x1="20" y1="420" x2="460" y2="420" stroke="currentColor" stroke-opacity="0.5" stroke-width="1.5" />
+      <text x="240" y="438" font-size="10.5" fill="var(--text-faint)" text-anchor="middle">common ground &mdash; supply, servo, and Arduino all share one</text>
+      <line x1="40" y1="180" x2="20" y2="180" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" />
+      <line x1="20" y1="180" x2="20" y2="420" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" />
+      <line x1="100" y1="350" x2="100" y2="420" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" />
+      <line x1="460" y1="370" x2="460" y2="420" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" />
+      <circle cx="240" cy="105" r="3" fill="currentColor" />
+      <circle cx="240" cy="130" r="3" fill="currentColor" />
+      <circle cx="240" cy="155" r="3" fill="currentColor" />
+      <circle cx="40" cy="180" r="3" fill="currentColor" />
+      <circle cx="200" cy="200" r="3" fill="var(--text-faint)" />
+      <circle cx="420" cy="80" r="3" fill="currentColor" />
+      <circle cx="420" cy="105" r="3" fill="currentColor" />
+      <circle cx="240" cy="280" r="3" fill="var(--accent)" />
+      <circle cx="100" cy="350" r="3" fill="currentColor" />
+      <circle cx="420" cy="275" r="3" fill="currentColor" />
+      <circle cx="420" cy="320" r="3" fill="var(--accent)" />
+      <circle cx="460" cy="370" r="3" fill="currentColor" />
+      <text x="248" y="108" font-size="10" fill="var(--text-faint)" text-anchor="start">A3</text>
+      <text x="34" y="177" font-size="10" fill="var(--text-faint)" text-anchor="end">GND</text>
+      <text x="200" y="212" font-size="10" fill="var(--text-faint)" text-anchor="middle">5V</text>
+      <text x="248" y="277" font-size="10" fill="var(--text-faint)" text-anchor="start">+</text>
+      <text x="100" y="362" font-size="10" fill="var(--text-faint)" text-anchor="middle">GND</text>
+      <text x="428" y="272" font-size="10" fill="var(--text-faint)" text-anchor="start">signal</text>
+      <text x="428" y="317" font-size="10" fill="var(--text-faint)" text-anchor="start">power</text>
+      <text x="460" y="382" font-size="10" fill="var(--text-faint)" text-anchor="middle">GND</text>
+    </svg>
+    <figcaption class="chart-caption">Signal to A3, AS5600 on the I&sup2;C bus, servo power from an external supply sized for its stall current &mdash; never the Arduino's own 5V pin. Full wiring notes are in the repo README.</figcaption>
+  </figure>
+
+  <h2>Safety notes</h2>
+  <ul style="color: var(--text-dim);">
+    <li><strong>Calibrate with a bare horn.</strong> No linkage, mechanism, gearbox, or load attached &mdash; a loaded mechanism can make a stall look like normal resistance and vice versa.</li>
+    <li>Calibration deliberately drives the servo into its mechanical end stops to find them, on purpose, briefly, once per direction &mdash; that's expected, not a malfunction.</li>
+    <li>A hard pulse-width safety ceiling exists as a fail-safe in case stall detection doesn't trigger for some reason; calibration aborts with a clear error instead of silently accepting a bad range.</li>
+  </ul>
+
+  <h2>Get the hardware side</h2>
+  <p style="color: var(--text-dim);">
+    The Arduino sketch and full build notes live in the
+    <a href={repoUrl} target="_blank" rel="noopener noreferrer">Servo-Calibrator repo</a> on GitHub &mdash;
+    flash <a href={sketchUrl} target="_blank" rel="noopener noreferrer"><code>ServoCalibrator_Companion.ino</code></a>
+    to your board, wire it up per the diagram above, then come back here and connect.
+  </p>
+
+  <div class="button-row" style="margin: 2.5rem 0;">
+    <a class="btn primary" href="/tools/servo-calibrator/app/">Launch Servo Calibrator &rarr;</a>
+    <a class="btn" href={repoUrl} target="_blank" rel="noopener noreferrer">View on GitHub</a>
+  </div>
+
+  <p class="chart-caption">
+    Runs entirely in your browser over Web Serial &mdash; nothing is uploaded to a server, and the page only talks to whatever port you pick in the browser's own device dialog.
+  </p>
+</BaseLayout>
