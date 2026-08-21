@@ -1,36 +1,32 @@
+/* Blueprint theme. Deliberately single-theme, no prefers-color-scheme split:
+   a blueprint is definitionally dark blue with pale linework -- a "light
+   mode" inversion would break the whole visual identity, the same reasoning
+   applied to the servo-study article this theme is modeled on. Background
+   and every color are painted explicitly here rather than tokenized per
+   light/dark. This replaces the site's previous light/dark warm-neutral
+   theme (see git history for that version if it's ever needed back). */
 :root {
-  --bg: #fbfaf8;
-  --bg-raised: #ffffff;
-  --text: #17181a;
-  --text-dim: #55585e;
-  --text-faint: #8a8d93;
-  --border: #e4e2dd;
-  --accent: #b45309;
-  --accent-soft: #fef3e8;
-  --code-bg: #f2f0ea;
-  --shadow: 0 1px 2px rgba(20, 20, 20, 0.04);
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --bg: #102C44;
+  --bg-deep: #0B2035;
+  --bg-raised: #17395A;
+  --bg-raised-alt: #1D4266;
+  --text: #F3F8FC;
+  --text-dim: #A9C7DE;
+  --text-faint: #6E93B1;
+  --border: #2C5678;
+  --border-strong: #3F7096;
+  --grid: rgba(230, 242, 250, 0.05);
+  --accent: #F2A93C;
+  --accent-ink: #2A1B04;
+  --accent-soft: rgba(242, 169, 60, 0.12);
+  --danger: #EF6F6C;
+  --series-1: #8FD3F4;
+  --series-2: #F2A93C;
+  --shadow: 0 0 0 1px rgba(230,242,250,0.06), 0 14px 32px -16px rgba(4,12,20,0.65);
+  --font-body: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Big Shoulders Display", var(--font-body);
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   --max-width: 46rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111213;
-    --bg-raised: #17181a;
-    --text: #eceae6;
-    --text-dim: #a8a9ad;
-    --text-faint: #6d6f74;
-    --border: #2a2b2d;
-    --accent: #e0983f;
-    --accent-soft: #2a2114;
-    --code-bg: #1c1d1f;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --series-1: #3987e5;
-    --series-2: #d95926;
-  }
 }
 
 * {
@@ -38,22 +34,31 @@
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: dark;
+  background: var(--bg);
 }
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 32px 32px,
+    var(--bg);
   color: var(--text);
   font-family: var(--font-body);
   font-size: 17px;
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 a {
   color: inherit;
-  text-decoration-color: var(--border);
+  text-decoration-color: var(--border-strong);
   text-underline-offset: 3px;
 }
 
@@ -62,9 +67,10 @@ a:hover {
 }
 
 h1, h2, h3, h4 {
-  line-height: 1.25;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: 0.005em;
 }
 
 code, pre {
@@ -73,20 +79,23 @@ code, pre {
 }
 
 code {
-  background: var(--code-bg);
+  background: rgba(230, 242, 250, 0.08);
+  color: var(--series-1);
   padding: 0.15em 0.4em;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 pre code {
   background: none;
+  color: inherit;
   padding: 0;
 }
 
 pre {
-  background: var(--code-bg);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
   padding: 1em;
-  border-radius: 8px;
+  border-radius: 4px;
   overflow-x: auto;
 }
 
@@ -97,7 +106,10 @@ pre {
 }
 
 .site-header {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border-strong);
+  background:
+    radial-gradient(ellipse at 80% -40%, rgba(242,169,60,0.08), transparent 60%),
+    var(--bg-deep);
 }
 
 .site-header .wrap {
@@ -116,6 +128,12 @@ pre {
   font-size: 1rem;
   color: var(--text);
   text-decoration: none;
+  letter-spacing: 0.01em;
+}
+
+.brand::before {
+  content: "/// ";
+  color: var(--border-strong);
 }
 
 .brand:hover {
@@ -125,17 +143,20 @@ pre {
 nav.main-nav {
   display: flex;
   gap: 1.5rem;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 nav.main-nav a {
   text-decoration: none;
-  color: var(--text-dim);
+  color: var(--text-faint);
 }
 
 nav.main-nav a:hover,
 nav.main-nav a[aria-current="page"] {
-  color: var(--text);
+  color: var(--accent);
 }
 
 main {
@@ -146,7 +167,8 @@ main {
   border-top: 1px solid var(--border);
   padding: 2rem 0;
   color: var(--text-faint);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
 }
 
 .site-footer .wrap {
@@ -174,25 +196,33 @@ main {
 /* Hero */
 .hero {
   margin-bottom: 3.5rem;
+  padding-top: 0.5rem;
 }
 
 .hero .kicker {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--accent);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin: 0 0 0.75rem;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.9rem;
+}
+
+.hero .kicker::before {
+  content: "/// ";
+  color: var(--border-strong);
 }
 
 .hero h1 {
-  font-size: clamp(1.8rem, 4vw, 2.4rem);
-  margin: 0 0 0.75rem;
+  font-size: clamp(2.1rem, 5.5vw, 3.1rem);
+  text-transform: uppercase;
+  line-height: 0.98;
+  margin: 0 0 1rem;
 }
 
 .hero p.lede {
   color: var(--text-dim);
-  font-size: 1.1rem;
+  font-size: 1.12rem;
   max-width: 38rem;
   margin: 0 0 1.5rem;
 }
@@ -205,11 +235,12 @@ main {
 
 .btn {
   display: inline-block;
-  padding: 0.55rem 1rem;
-  border-radius: 6px;
-  border: 1px solid var(--border);
+  padding: 0.6rem 1.1rem;
+  border-radius: 2px;
+  border: 1.5px solid var(--border-strong);
   text-decoration: none;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
   color: var(--text);
   background: var(--bg-raised);
   box-shadow: var(--shadow);
@@ -221,15 +252,16 @@ main {
 }
 
 .btn.primary {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+  font-weight: 600;
 }
 
 .btn.primary:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg-deep);
 }
 
 /* Section headings */
@@ -241,12 +273,14 @@ main {
 }
 
 .section-heading h2 {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
+  text-transform: uppercase;
   margin: 0;
 }
 
 .section-heading a {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
   color: var(--text-dim);
   text-decoration: none;
 }
@@ -262,16 +296,17 @@ main {
 }
 
 .project-card {
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   background: var(--bg-raised);
-  border-radius: 10px;
+  border-radius: 2px;
   padding: 1.25rem 1.4rem;
   box-shadow: var(--shadow);
 }
 
 .project-card h3 {
   margin: 0 0 0.4rem;
-  font-size: 1.05rem;
+  font-size: 1.15rem;
+  text-transform: none;
 }
 
 .project-card h3 a {
@@ -297,34 +332,37 @@ main {
 
 .tag {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-dim);
-  background: var(--code-bg);
+  background: rgba(230, 242, 250, 0.06);
+  border: 1px solid var(--border);
   padding: 0.15em 0.55em;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 .status-badge {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--accent);
   background: var(--accent-soft);
+  border: 1px solid rgba(242, 169, 60, 0.35);
   padding: 0.15em 0.55em;
-  border-radius: 4px;
+  border-radius: 2px;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
 }
 
 .project-links {
   display: flex;
   gap: 1rem;
   font-size: 0.88rem;
+  font-family: var(--font-mono);
   margin-top: 0.6rem;
 }
 
 .project-links a {
   text-decoration: none;
-  color: var(--text);
+  color: var(--series-1);
   font-weight: 500;
 }
 
@@ -346,13 +384,16 @@ main {
 
 .article-item time {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .article-item h3 {
   margin: 0.3rem 0 0.4rem;
-  font-size: 1.15rem;
+  font-size: 1.25rem;
+  text-transform: none;
 }
 
 .article-item h3 a {
@@ -369,8 +410,8 @@ main {
 }
 
 .empty-state {
-  border: 1px dashed var(--border);
-  border-radius: 10px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 2px;
   padding: 2rem;
   text-align: center;
   color: var(--text-dim);
@@ -379,6 +420,7 @@ main {
 /* About page */
 .about-body :is(h2, h3) {
   margin-top: 2rem;
+  text-transform: none;
 }
 
 .about-body p {
@@ -388,9 +430,9 @@ main {
 /* Charts (inline SVG figures in article bodies) */
 .chart-figure {
   margin: 2rem 0;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   background: var(--bg-raised);
-  border-radius: 10px;
+  border-radius: 2px;
   padding: 1.25rem 1.4rem 1rem;
   box-shadow: var(--shadow);
 }
@@ -403,9 +445,12 @@ main {
 }
 
 .chart-title {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-dim);
   margin: 0 0 0.9rem;
 }
 
@@ -413,6 +458,7 @@ main {
   display: flex;
   gap: 1.25rem;
   font-size: 0.8rem;
+  font-family: var(--font-mono);
   color: var(--text-dim);
   margin-top: 0.5rem;
 }
@@ -421,7 +467,7 @@ main {
   display: inline-block;
   width: 10px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: 1px;
   margin-right: 0.4rem;
   vertical-align: middle;
 }
@@ -471,7 +517,8 @@ main {
 }
 
 .comments-section h2 {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  text-transform: uppercase;
   margin: 0 0 0.75rem;
 }
 
@@ -523,7 +570,7 @@ main {
 .comment-replies {
   margin-top: 1rem;
   padding-left: 1.25rem;
-  border-left: 2px solid var(--border);
+  border-left: 2px solid var(--border-strong);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -552,6 +599,7 @@ main {
 .comment-field label {
   display: block;
   font-size: 0.85rem;
+  font-family: var(--font-mono);
   color: var(--text-dim);
   margin-bottom: 0.4rem;
 }
@@ -565,8 +613,8 @@ main {
 .comment-field textarea {
   width: 100%;
   background: var(--bg-raised);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
   padding: 0.55rem 0.7rem;
   color: var(--text);
   font-family: inherit;
@@ -610,15 +658,22 @@ main {
   font-family: var(--font-mono);
   font-size: 0.85rem;
   color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .article-header h1 {
-  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+  text-transform: uppercase;
   margin: 0.5rem 0 0.75rem;
 }
 
 .article-body p, .article-body li {
   color: var(--text-dim);
+}
+
+.article-body h2, .article-body h3 {
+  text-transform: none;
 }
 
 .article-body {
