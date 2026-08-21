@@ -111,4 +111,52 @@ To preview a `draft: true` article/route that the build filters out: flip
 `draft: false`, `npm run build`, flip back to `draft: true` immediately after
 — the already-built `dist/` output keeps serving the page via `npm run
 preview` even though the source is back to draft, so the working tree stays
-clean while still being previewable.
+clean while still being previewable. **For a GitHub-sourced article** (see
+below), that flip now has to happen in the *project* repo's `article.md`,
+not here — this repo's own working tree has nothing to flip back.
+
+## Articles are fetched from each project's own repo, not authored here (2026-08-21)
+
+`src/content.config.ts`'s `articles` collection uses a custom Content Layer
+loader (`src/loaders/github-article.ts`, `githubArticlesLoader()`) instead
+of the local `glob()` loader `projects` still uses. It fetches each
+project's `article.md` straight from that project's own GitHub repo (via
+the GitHub Contents API) at build time and stores it as a normal collection
+entry — same frontmatter schema, same `render(entry)` call in the article
+page template, nothing else changed. **There is currently no local-file
+path for articles at all** — `src/content/articles/` is empty; every
+article this site shows has to come from a project repo's own
+`article.md`. (A hybrid loader merging local + remote sources would be a
+reasonable future addition if a non-project-tied article is ever wanted —
+not built, since there's been no need yet.)
+
+**Why**: the user prefers to write a project's article at the project
+level and have this site pull it in, rather than authoring it twice or
+syncing it via a git submodule (submodules were considered and rejected —
+fragile with Vercel, and painful for private repos specifically). See the
+Servo-Calibrator repo's own `CLAUDE.md` for the reasoning from that side.
+
+**To add another project's article**: add one entry to the `articleSources`
+array at the top of `content.config.ts` — `{ id, repo: 'owner/name', path:
+'article.md' }`. The `id` becomes the route (`/articles/<id>/`).
+
+**Auth**: needs `GITHUB_CONTENT_TOKEN` (see `.env.example`) — a
+fine-grained GitHub PAT, `Contents: Read-only`, scoped to just the repos
+listed in `articleSources`. Not set yet in this environment or in Vercel as
+of this writing; the user should create one when ready to actually publish
+a fetched article (matches the "manual deploy" preference — nothing here
+auto-triggers a rebuild when a project repo's `article.md` changes, so
+publishing is: flip `draft: false` in the project repo, then trigger a
+redeploy here yourself, whenever you're ready). **Missing token or a failed
+fetch is non-fatal** — the loader logs a warning (`[github-articles-loader]`
+in the build output) and skips that source, so the rest of the site still
+builds. Verified end-to-end in this session using a temporary local token
+(the CLI's own `gh auth token`, never committed) — confirmed the loader
+correctly fetches, parses frontmatter, and renders Servo-Calibrator's
+`article.md`; also confirmed its `draft: true` correctly keeps it out of
+both `/articles/` and its own route until flipped.
+
+**First real instance**: Servo-Calibrator's `article.md` (`id:
+'your-servo-is-lying-to-you'`), replacing the old locally-authored
+`servo-calibration.md` (removed this session — treat that content as
+superseded, not lost; it's still in git history if ever needed).
