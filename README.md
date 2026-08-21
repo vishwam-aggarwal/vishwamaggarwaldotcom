@@ -5,10 +5,11 @@ Personal site / portfolio for Vishwam Aggarwal — projects, research write-ups,
 ## Structure
 
 - `src/content/projects/` — one Markdown file per project (frontmatter: `title`, `summary`, `tags`, `repo`, `demo`, `status`, `featured`, `order`)
-- `src/content/articles/` — one Markdown file per article (frontmatter: `title`, `description`, `pubDate`, `tags`, `draft`)
+- `src/content/articles/` — empty. Articles aren't authored here — see "Adding an article" below.
+- `src/loaders/github-article.ts` — the custom loader that fetches each project's `article.md` from its own GitHub repo at build time (frontmatter: `title`, `description`, `pubDate`, `tags`, `draft` — same schema an article would have if it were local)
 - `src/pages/` — routes (home, `/projects/`, `/articles/`, `/about/`)
 - `src/components/`, `src/layouts/` — shared UI
-- `src/styles/global.css` — all styling (light/dark via `prefers-color-scheme`)
+- `src/styles/global.css` — all styling
 
 ## Adding a project
 
@@ -16,7 +17,7 @@ Copy an existing file in `src/content/projects/` and edit the frontmatter + body
 
 ## Adding an article
 
-Copy `src/content/articles/hello-world.md`, fill in the frontmatter, write the body in Markdown, and set `draft: false`.
+Write `article.md` at the root of the project's own GitHub repo (frontmatter: `title`, `description`, `pubDate`, `tags`, `draft`; inline SVG charts use the `--series-1`/`--series-2` CSS tokens from `src/styles/global.css`), then add one entry to the `articleSources` array in `src/content.config.ts` (`{ id, repo: 'owner/name', path: 'article.md' }`). Set `draft: false` in that repo when ready to publish, then trigger a redeploy here. See `CLAUDE.md` for the full pipeline and the token setup it needs.
 
 ## Local development
 
@@ -29,4 +30,4 @@ npm run preview   # preview the production build
 
 ## Deployment
 
-Deployed on [Vercel](https://vercel.com), connected to this GitHub repo — pushes to `main` deploy automatically. Custom domain (`vishwamaggarwal.com`) is on Cloudflare, pointed at Vercel.
+Deployed on [Vercel](https://vercel.com), connected to this GitHub repo — pushes to `master` deploy automatically. Custom domain (`vishwamaggarwal.com`) is on Cloudflare, pointed at Vercel.
