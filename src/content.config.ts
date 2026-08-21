@@ -1,5 +1,14 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { githubArticlesLoader } from './loaders/github-article';
+
+// Each project repo's own article.md, pulled in at build time -- see
+// src/loaders/github-article.ts and CLAUDE.md's dated entry. Add an entry
+// here for each project repo that has a website write-up; the loader
+// fetches all of them.
+const articleSources = [
+  { id: 'your-servo-is-lying-to-you', repo: 'vishwam-aggarwal/Servo-Calibrator', path: 'article.md' },
+];
 
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
@@ -19,7 +28,7 @@ const projects = defineCollection({
 });
 
 const articles = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/articles' }),
+  loader: githubArticlesLoader(articleSources),
   schema: z.object({
     title: z.string(),
     description: z.string(),
