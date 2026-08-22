@@ -8,6 +8,12 @@ dist/
 # if the source image ever changes.
 public/images/
 
+# same reasoning, for Tools-section web apps fetched from their own
+# project repos at build time (src/loaders/github-tool-app.ts). This
+# used to be a one-time copy-paste that had already gone stale relative
+# to the source repo before the loader existed.
+public/tools/*/app/
+
 # dependencies
 node_modules/
 

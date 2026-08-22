@@ -38,7 +38,7 @@ interface ArticleSource {
   images?: string[];
 }
 
-async function fetchGithubFile(repo: string, filePath: string, token: string, ref?: string) {
+export async function fetchGithubFile(repo: string, filePath: string, token: string, ref?: string) {
   const apiUrl = `https://api.github.com/repos/${repo}/contents/${filePath}${ref ? `?ref=${ref}` : ''}`;
   const res = await fetch(apiUrl, {
     headers: {

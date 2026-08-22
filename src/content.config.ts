@@ -1,6 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { githubArticlesLoader } from './loaders/github-article';
+import { githubToolAppsLoader } from './loaders/github-tool-app';
 
 // Each project repo's own article.md, pulled in at build time -- see
 // src/loaders/github-article.ts and CLAUDE.md's dated entry. Add an entry
@@ -28,6 +29,19 @@ const articleSources = [
 const articleDataSources = articleSources
   .filter((source) => source.dataPath)
   .map((source) => ({ id: source.id, repo: source.repo, path: source.dataPath, images: source.dataImages }));
+
+// Each Tools-section web app's HTML, pulled from its own project repo at
+// build time -- see src/loaders/github-tool-app.ts. Written to
+// public/tools/<slug>/app/index.html, same URL each tool's landing page
+// already links to. Add an entry here for each tool whose app should stay
+// synced with its source repo instead of being a hand-copied static file.
+const toolAppSources = [
+  {
+    slug: 'servo-calibrator',
+    repo: 'vishwam-aggarwal/Servo-Calibrator',
+    path: 'ServoCalibrator.html',
+  },
+];
 
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
@@ -68,4 +82,12 @@ const articleData = defineCollection({
   }),
 });
 
-export const collections = { projects, articles, articleData };
+// No entries stored -- this loader's only job is the side effect of
+// writing files into public/ during content sync (see its doc comment).
+// Nothing on the site queries this collection; it exists so Astro's
+// Content Layer actually invokes the loader.
+const toolApps = defineCollection({
+  loader: githubToolAppsLoader(toolAppSources),
+});
+
+export const collections = { projects, articles, articleData, toolApps };
