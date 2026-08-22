@@ -22,6 +22,20 @@
   --danger: #EF6F6C;
   --series-1: #8FD3F4;
   --series-2: #F2A93C;
+  /* Per-model palette for charts comparing every table size at once (not
+     just the two-way naive-vs-table split --series-1/--series-2 cover).
+     --model-linear2 reuses --series-2 (the naive baseline, same meaning
+     everywhere else). The five table sizes get a tight blue/cyan
+     gradient, deliberately close together rather than a rainbow --
+     they're all nearly the same accuracy, which is the diminishing-
+     returns finding itself; a rainbow would visually overstate how
+     different they are from each other. */
+  --model-linear2: var(--series-2);
+  --model-table10: #A3DBF5;
+  --model-table20: #88D0F2;
+  --model-table30: #6CC5EF;
+  --model-table40: #51BBEC;
+  --model-table50: #35B0E9;
   --shadow: 0 0 0 1px rgba(230,242,250,0.06), 0 14px 32px -16px rgba(4,12,20,0.65);
   --font-body: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-display: "Big Shoulders Display", var(--font-body);
