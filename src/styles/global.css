@@ -435,6 +435,13 @@ main {
   border-radius: 2px;
   padding: 1.25rem 1.4rem 1rem;
   box-shadow: var(--shadow);
+  /* Defensive: a chart-figure's content is hand-authored inline
+     SVG/HTML per-article, not schema-checked -- overflow-x: auto keeps
+     any future too-wide element (a long legend line, an unexpectedly
+     large viewBox) contained to the card instead of blowing out the
+     whole page horizontally, same failure mode the table fix above
+     addresses for plain markdown tables. */
+  overflow-x: auto;
 }
 
 .chart-figure svg {
@@ -456,7 +463,8 @@ main {
 
 .chart-legend {
   display: flex;
-  gap: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
   font-size: 0.8rem;
   font-family: var(--font-mono);
   color: var(--text-dim);
