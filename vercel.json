@@ -1,8 +1,18 @@
 {
   "redirects": [
     {
-      "source": "/articles/your-servo-is-lying-to-you/:path*",
-      "destination": "/articles/hobby-servo-calibration/:path*",
+      "source": "/articles/your-servo-is-lying-to-you",
+      "destination": "/articles/hobby-servo-calibration",
+      "permanent": true
+    },
+    {
+      "source": "/articles/your-servo-is-lying-to-you/",
+      "destination": "/articles/hobby-servo-calibration/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/your-servo-is-lying-to-you/:path+",
+      "destination": "/articles/hobby-servo-calibration/:path+",
       "permanent": true
     }
   ]
