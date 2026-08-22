@@ -35,3 +35,9 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Internal Claude Code working notes -- development narrative, not
+# meant for public consumption. Kept locally only, never pushed. See
+# each project repo's own copy for the reasoning if this is ever
+# reconsidered.
+CLAUDE.md
