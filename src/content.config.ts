@@ -17,7 +17,7 @@ import { githubToolAppsLoader } from './loaders/github-tool-app';
 // entry with no dataPath simply gets no /data/ page.
 const articleSources = [
   {
-    id: 'your-servo-is-lying-to-you',
+    id: 'hobby-servo-calibration',
     repo: 'vishwam-aggarwal/Servo-Calibrator',
     path: 'article.md',
     images: ['test-jig.jpg'],
@@ -25,9 +25,8 @@ const articleSources = [
     dataImages: [] as string[],
   },
   {
-    // "Your Motor Doesn't Know How To Get There" -- article is up on the
-    // repo (draft: true, wording still being tweaked in a pending PR).
-    id: 'your-motor-doesnt-know-how-to-get-there',
+    // "Your Motor Doesn't Know How To Get There"
+    id: 'universal-trajectory-interface',
     repo: 'vishwam-aggarwal/Universal-Trajectory-Interface',
     path: 'article.md',
     images: [] as string[],
