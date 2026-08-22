@@ -14,6 +14,11 @@
       "source": "/articles/your-servo-is-lying-to-you/:path+",
       "destination": "/articles/hobby-servo-calibration/:path+",
       "permanent": true
+    },
+    {
+      "source": "/articles/your-servo-is-lying-to-you/:path+/",
+      "destination": "/articles/hobby-servo-calibration/:path+/",
+      "permanent": true
     }
   ]
 }
