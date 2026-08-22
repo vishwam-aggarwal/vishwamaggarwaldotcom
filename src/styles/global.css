@@ -679,3 +679,39 @@ main {
 .article-body {
   font-size: 1.02rem;
 }
+
+/* A plain GFM markdown table (unlike .chart-data table, which lives inside
+   a chart-figure) had no rules at all until this was added -- a wide table
+   forced its natural content width onto .article-body/.wrap, overflowing
+   the whole page horizontally instead of just scrolling itself. display:
+   block + overflow-x: auto makes the table scroll within its own box
+   instead of blowing out its container -- the standard fix for this. */
+.article-body table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: 1.75rem 0;
+  font-size: 0.92rem;
+}
+
+.article-body th,
+.article-body td {
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.article-body th {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+}
+
+.article-body img {
+  max-width: 100%;
+  height: auto;
+}
