@@ -2,6 +2,12 @@
 dist/
 .astro/
 
+# images fetched at build time from project repos' article.md sources
+# (src/loaders/github-article.ts) -- regenerated fresh every build, same
+# reasoning as dist/.astro/ above: committing a copy risks it going stale
+# if the source image ever changes.
+public/images/
+
 # dependencies
 node_modules/
 
