@@ -2,7 +2,7 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 
 const repoUrl = 'https://github.com/vishwam-aggarwal/Servo-Calibrator';
-const sketchUrl = `${repoUrl}/blob/main/ServoCalibrator_Companion/ServoCalibrator_Companion.ino`;
+const sketchUrl = `${repoUrl}/blob/master/ServoCalibrator_Companion/ServoCalibrator_Companion.ino`;
 ---
 
 <BaseLayout
@@ -23,7 +23,7 @@ const sketchUrl = `${repoUrl}/blob/main/ServoCalibrator_Companion/ServoCalibrato
 
   <p>
     Hobby servos aren't as linear as the datasheet says &mdash; see
-    <a href="/articles/servo-calibration/">the write-up</a> for exactly how much.
+    <a href="/articles/hobby-servo-calibration/">the write-up</a> for exactly how much.
     This tool measures your specific servo's real pulse&harr;angle curve using an
     AS5600 magnetic encoder as ground truth, builds a 20-point calibration table
     automatically, and then lets you drive and watch live trajectories against it
