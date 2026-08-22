@@ -7,7 +7,12 @@ import { githubArticlesLoader } from './loaders/github-article';
 // here for each project repo that has a website write-up; the loader
 // fetches all of them.
 const articleSources = [
-  { id: 'your-servo-is-lying-to-you', repo: 'vishwam-aggarwal/Servo-Calibrator', path: 'article.md' },
+  {
+    id: 'your-servo-is-lying-to-you',
+    repo: 'vishwam-aggarwal/Servo-Calibrator',
+    path: 'article.md',
+    images: ['test-jig.jpg'],
+  },
 ];
 
 const projects = defineCollection({
