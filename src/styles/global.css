@@ -520,9 +520,16 @@ main {
    a chart's inline SVG scales via viewBox, so a wider card also means
    bigger axis labels/data-point text, not just more surrounding
    whitespace. No effect below 56rem viewport, so phones/tablets keep
-   exactly today's layout. */
+   exactly today's layout.
+
+   Scoped to .data-page only (set on the wrapper in data.astro): the
+   article page settled on charts matching the text column width, but
+   the data page's subplot grids (3 units per row) need the extra room
+   or the third subplot in each row wraps and renders oversized relative
+   to its siblings. Deliberately not global anymore -- article.md and
+   data.md now intentionally disagree on this. */
 @media (min-width: 56rem) {
-  .chart-figure {
+  .data-page .chart-figure {
     width: min(92vw, 64rem);
     margin-left: 50%;
     transform: translateX(-50%);

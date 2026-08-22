@@ -24,7 +24,7 @@ const article = await getEntry('articles', entry.id);
   title={`${entry.data.title} — Full Dataset`}
   description={entry.data.description ?? `Every plot and the full dataset behind "${entry.data.title}".`}
 >
-  <div class="prose-frame">
+  <div class="prose-frame data-page">
     <a href={`/articles/${entry.id}/`} style="color: var(--text-dim); text-decoration: none; font-size: 0.9rem;">
       &larr; Back to {article ? article.data.title : 'the article'}
     </a>
