@@ -26,7 +26,12 @@
   --font-body: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-display: "Big Shoulders Display", var(--font-body);
   --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  --max-width: 46rem;
+  --max-width: 60rem;
+  /* Matches the OLD --max-width's effective content column (46rem minus
+     .wrap's 1.5rem side padding, twice) exactly -- widening the page frame
+     above doesn't change continuous-paragraph line length at all, only the
+     surrounding margins. See .prose-frame below. */
+  --prose-width: 43rem;
 }
 
 * {
@@ -103,6 +108,17 @@ pre {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 1.5rem;
+}
+
+/* Caps continuous-paragraph content (article body/header, comments, the
+   About page bio) to a comfortable reading measure, centered within the
+   wider .wrap frame -- centered rather than flush-left specifically so
+   .chart-figure's viewport-breakout math below (which centers itself
+   relative to its parent's midpoint) still lands on true viewport center
+   instead of drifting off to one side. */
+.prose-frame {
+  max-width: var(--prose-width);
+  margin: 0 auto;
 }
 
 .site-header {
@@ -449,6 +465,20 @@ main {
   height: auto;
   display: block;
   overflow: visible;
+}
+
+/* Charts break out wider than the page's 46rem reading column on screens
+   that have room for it -- body text stays a comfortable line length, but
+   a chart's inline SVG scales via viewBox, so a wider card also means
+   bigger axis labels/data-point text, not just more surrounding
+   whitespace. No effect below 56rem viewport, so phones/tablets keep
+   exactly today's layout. */
+@media (min-width: 56rem) {
+  .chart-figure {
+    width: min(92vw, 64rem);
+    margin-left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 .chart-title {

@@ -32,6 +32,7 @@ const articleSchema = {
   pubDate={article.data.pubDate}
   structuredData={articleSchema}
 >
+  <div class="prose-frame">
   <a href="/articles/" style="color: var(--text-dim); text-decoration: none; font-size: 0.9rem;">&larr; All articles</a>
 
   <header class="article-header">
@@ -49,4 +50,5 @@ const articleSchema = {
   </div>
 
   <Comments pageId={article.id} pageUrl={articleSchema.url} pageTitle={article.data.title} />
+  </div>
 </BaseLayout>
