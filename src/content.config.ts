@@ -25,12 +25,9 @@ const articleSources = [
     dataImages: [] as string[],
   },
   {
-    // Placeholder id (route: /articles/universal-trajectory-interface/) --
-    // rename to something title-derived, like the servo article's id
-    // above, once the article has a title. article.md doesn't exist yet
-    // in this repo, so this entry is inert until it's added (the loader
-    // 404s and skips it, same non-fatal behavior as a missing token).
-    id: 'universal-trajectory-interface',
+    // "Your Motor Doesn't Know How To Get There" -- article is up on the
+    // repo (draft: true, wording still being tweaked in a pending PR).
+    id: 'your-motor-doesnt-know-how-to-get-there',
     repo: 'vishwam-aggarwal/Universal-Trajectory-Interface',
     path: 'article.md',
     images: [] as string[],
