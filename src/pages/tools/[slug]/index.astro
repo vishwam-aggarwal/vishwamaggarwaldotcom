@@ -8,6 +8,7 @@
 // /tools/<slug>/app/, so it doesn't need to come from frontmatter.
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Comments from '../../../components/Comments.astro';
 
 export async function getStaticPaths() {
   const toolPages = await getCollection('toolPages', ({ data }) => !data.draft);
@@ -19,6 +20,7 @@ export async function getStaticPaths() {
 
 const { toolPage } = Astro.props;
 const { Content } = await render(toolPage);
+const pageUrl = new URL(`/tools/${toolPage.id}/`, 'https://vishwamaggarwal.com').toString();
 ---
 
 <BaseLayout title={toolPage.data.title} description={toolPage.data.description}>
@@ -40,4 +42,6 @@ const { Content } = await render(toolPage);
     <a class="btn primary" href={`/tools/${toolPage.id}/app/`}>Launch {toolPage.data.title} &rarr;</a>
     <a class="btn" href={toolPage.data.repo} target="_blank" rel="noopener noreferrer">View on GitHub</a>
   </div>
+
+  <Comments pageId={toolPage.id} pageUrl={pageUrl} pageTitle={toolPage.data.title} />
 </BaseLayout>
