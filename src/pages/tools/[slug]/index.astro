@@ -1,0 +1,43 @@
+---
+// Each tool's landing page content is authored in its own project repo
+// (website/tool.md) and pulled in at build time -- see content.config.ts's
+// toolPageSources and CLAUDE.md's dated entry on articles for the same
+// reasoning applied to tools. This template supplies only the chrome that's
+// the same for every tool: back-link, tag row/status badge, the rendered
+// body, then a fixed Launch/GitHub button row -- the launch path is always
+// /tools/<slug>/app/, so it doesn't need to come from frontmatter.
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const toolPages = await getCollection('toolPages', ({ data }) => !data.draft);
+  return toolPages.map((toolPage) => ({
+    params: { slug: toolPage.id },
+    props: { toolPage },
+  }));
+}
+
+const { toolPage } = Astro.props;
+const { Content } = await render(toolPage);
+---
+
+<BaseLayout title={toolPage.data.title} description={toolPage.data.description}>
+  <a href="/tools/" style="color: var(--text-dim); text-decoration: none; font-size: 0.9rem;">&larr; All tools</a>
+
+  <header class="article-header">
+    <div class="tag-row" style="margin-top: 1rem;">
+      <span class="status-badge">{toolPage.data.status}</span>
+      {toolPage.data.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+    </div>
+    <h1>{toolPage.data.title}</h1>
+  </header>
+
+  <div class="article-body">
+    <Content />
+  </div>
+
+  <div class="button-row" style="margin: 2.5rem 0;">
+    <a class="btn primary" href={`/tools/${toolPage.id}/app/`}>Launch {toolPage.data.title} &rarr;</a>
+    <a class="btn" href={toolPage.data.repo} target="_blank" rel="noopener noreferrer">View on GitHub</a>
+  </div>
+</BaseLayout>

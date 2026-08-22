@@ -1,15 +1,8 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const tools = [
-  {
-    slug: 'servo-calibrator',
-    title: 'Servo Calibrator',
-    summary: 'Characterize a hobby servo’s real pulse↔angle curve with an AS5600 encoder, then drive and visualize live trajectories against it — right in your browser.',
-    tags: ['Web Serial', 'Robotics', 'Arduino'],
-    status: 'active',
-  },
-];
+const tools = await getCollection('toolPages', ({ data }) => !data.draft);
 ---
 
 <BaseLayout title="Tools" description="Browser-based tools by Vishwam Aggarwal that talk directly to your hardware.">
@@ -19,19 +12,26 @@ const tools = [
     <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API" target="_blank" rel="noopener noreferrer">Web Serial</a>
     &mdash; no install, no account, nothing sent to a server. Chrome or Edge on desktop only; Web Serial isn't implemented in Firefox or Safari.
   </p>
-  <div class="project-grid">
-    {tools.map((tool) => (
-      <article class="project-card">
-        <div class="tag-row">
-          <span class="status-badge">{tool.status}</span>
-          {tool.tags.map((tag) => <span class="tag">{tag}</span>)}
-        </div>
-        <h3><a href={`/tools/${tool.slug}/`}>{tool.title}</a></h3>
-        <p>{tool.summary}</p>
-        <div class="project-links">
-          <a href={`/tools/${tool.slug}/`}>Read more &rarr;</a>
-        </div>
-      </article>
-    ))}
-  </div>
+
+  {tools.length === 0 ? (
+    <div class="empty-state">
+      <p>No tools published yet — check back soon.</p>
+    </div>
+  ) : (
+    <div class="project-grid">
+      {tools.map((tool) => (
+        <article class="project-card">
+          <div class="tag-row">
+            <span class="status-badge">{tool.data.status}</span>
+            {tool.data.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+          </div>
+          <h3><a href={`/tools/${tool.id}/`}>{tool.data.title}</a></h3>
+          <p>{tool.data.description}</p>
+          <div class="project-links">
+            <a href={`/tools/${tool.id}/`}>Read more &rarr;</a>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
 </BaseLayout>
