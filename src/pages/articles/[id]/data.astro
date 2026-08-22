@@ -1,0 +1,40 @@
+---
+// Companion "every plot, full dataset" page for an article -- see the
+// dataPath comment in content.config.ts. Deliberately not linked from
+// anywhere but the article itself (by hand, in its markdown body): this
+// is for a reader who wants more than the article chose to show, not a
+// second front door into the content.
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('articleData', ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { id: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const article = await getEntry('articles', entry.id);
+---
+
+<BaseLayout
+  title={`${entry.data.title} — Full Dataset`}
+  description={entry.data.description ?? `Every plot and the full dataset behind "${entry.data.title}".`}
+>
+  <div class="prose-frame">
+    <a href={`/articles/${entry.id}/`} style="color: var(--text-dim); text-decoration: none; font-size: 0.9rem;">
+      &larr; Back to {article ? article.data.title : 'the article'}
+    </a>
+
+    <header class="article-header">
+      <h1>{entry.data.title}</h1>
+    </header>
+
+    <div class="article-body">
+      <Content />
+    </div>
+  </div>
+</BaseLayout>
