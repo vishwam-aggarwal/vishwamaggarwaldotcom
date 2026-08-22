@@ -458,6 +458,40 @@ main {
 }
 
 /* Charts (inline SVG figures in article bodies) */
+/* Chart cards get their own light palette, scoped locally -- a plot's
+   gridlines/labels/data need to read clearly at a glance, and thin light
+   lines on dark blue (the rest of the site's blueprint theme) don't do
+   that as well as dark ink on white does. This redefines the same custom
+   property names every chart SVG and caption already references
+   (--bg-raised, --text*, --border*, --series-1/2, --accent, --model-*),
+   scoped to .chart-figure and everything nested inside it -- so every
+   existing chart (in this article and any other) picks up the new
+   values automatically, with no changes needed to the SVG markup
+   itself. Colors follow MATLAB's own default palette (the axes color
+   order for series-1/2/accent, parula-derived blues-to-yellow-green for
+   the per-model gradient) since that's the specific look this was
+   modeled on. Only .chart-figure's own descendants are affected --
+   these property names still mean the dark-theme values everywhere
+   else on the page. */
+.chart-figure {
+  --bg-raised: #FFFFFF;
+  --text: #1A1D21;
+  --text-dim: #3D434A;
+  --text-faint: #6B7280;
+  --border: #E2E5E9;
+  --border-strong: #C7CCD1;
+  --series-1: #0072BD;
+  --series-2: #D95319;
+  --accent: #EDB120;
+  --danger: #A2142F;
+  --model-linear2: var(--series-2);
+  --model-table10: #2C3E8C;
+  --model-table20: #1C7ED6;
+  --model-table30: #12A594;
+  --model-table40: #6FBF52;
+  --model-table50: #D9D93C;
+}
+
 .chart-figure {
   margin: 2rem 0;
   border: 1.5px solid var(--border-strong);
