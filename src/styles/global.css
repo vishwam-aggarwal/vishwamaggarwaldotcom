@@ -491,6 +491,38 @@ main {
   margin: 0 0 0.9rem;
 }
 
+/* Multiple small charts sharing one chart-figure card -- e.g. one row per
+   family, one subplot per unit, mirroring how the MATLAB toolkit lays out
+   its own figures (one figure per type, one subplot per unit) instead of
+   a full-width chart-figure per unit, which reads as a wall of near-
+   identical cards once there are several units to show. Wraps to fewer
+   columns (down to one) as space runs out, rather than a fixed column
+   count -- same reasoning as .chart-legend's flex-wrap above. */
+.subplot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.subplot {
+  flex: 1 1 15rem;
+  min-width: 0;
+}
+
+.subplot svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.subplot-caption {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  text-align: center;
+}
+
 .chart-legend {
   display: flex;
   flex-wrap: wrap;

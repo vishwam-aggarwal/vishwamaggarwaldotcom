@@ -6,14 +6,28 @@ import { githubArticlesLoader } from './loaders/github-article';
 // src/loaders/github-article.ts and CLAUDE.md's dated entry. Add an entry
 // here for each project repo that has a website write-up; the loader
 // fetches all of them.
+//
+// dataPath/dataImages are optional: a second file in the same repo (by
+// convention, data.md) holding every plot that didn't make the article
+// itself -- for readers who want the full dataset, without crowding the
+// article. Rendered at /articles/<id>/data/, linked from the article body
+// by hand wherever it reads naturally (see githubArticlesLoader's doc
+// comment -- same fetch mechanism, just a second document per source). An
+// entry with no dataPath simply gets no /data/ page.
 const articleSources = [
   {
     id: 'your-servo-is-lying-to-you',
     repo: 'vishwam-aggarwal/Servo-Calibrator',
     path: 'article.md',
     images: ['test-jig.jpg'],
+    dataPath: 'data.md',
+    dataImages: [] as string[],
   },
 ];
+
+const articleDataSources = articleSources
+  .filter((source) => source.dataPath)
+  .map((source) => ({ id: source.id, repo: source.repo, path: source.dataPath, images: source.dataImages }));
 
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
@@ -43,4 +57,15 @@ const articles = defineCollection({
   }),
 });
 
-export const collections = { projects, articles };
+// Companion "every plot, full dataset" page per article -- see the
+// dataPath comment above. Same draft-then-flip workflow as articles.
+const articleData = defineCollection({
+  loader: githubArticlesLoader(articleDataSources),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { projects, articles, articleData };
