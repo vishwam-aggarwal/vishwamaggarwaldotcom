@@ -206,8 +206,9 @@ session. **The website/tool page draft-then-flip gotcha is the same as
 articles** (see "Local preview gotcha" above): flip `draft: false` in the
 *project* repo's `website/tool.md`, not here.
 
-Servo-Calibrator's `website/tool.md` is still `draft: true` as of this
-session — its content (what the tool does, wiring diagram, safety-relevant
-notes, and a "Getting the firmware to compile" section covering the
-AS5600 + Universal-Trajectory-Interface Arduino IDE library setup) is
-written and merged, but hasn't had the user's go-ahead to go live yet.
+**Now published**: Servo-Calibrator's `website/tool.md` flipped to
+`draft: false` the same session, on the user's go-ahead — before their own
+content read-through, so if a future session is asked to touch this page,
+know it hasn't had the author's final pass yet (same caveat as the
+`servo-calibration.md` article entry above). Live at
+`/tools/servo-calibrator/`.
