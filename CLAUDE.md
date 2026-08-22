@@ -56,15 +56,17 @@ Everything below is pushed to `master` and live in production:
   favicon (`public/favicon.svg`) already rendered "VA" fully capitalized
   before this change, so it needed no update to match.
 - **Tools section + Servo Calibrator web app** — `/tools/`,
-  `/tools/servo-calibrator/` (wiring schematic, safety notes, GitHub links),
-  and the actual calibrator app at `/tools/servo-calibrator/app/`. **Known
-  non-blocking issue:** the GitHub links on that page point at
-  `vishwam-aggarwal/Servo-Calibrator`, which is still **private** (and its
-  firmware depends on two more private repos,
-  `Universal-Motor-Interface`/`Universal-Trajectory-Interface`) — those links
-  currently 404 for visitors. The user explicitly deferred fixing this
-  ("we'll figure out how to give users access to the sketch later") — don't
-  flip any repo visibility without asking first.
+  `/tools/servo-calibrator/`, and the actual calibrator app at
+  `/tools/servo-calibrator/app/`. The old "known non-blocking issue" noted
+  here (GitHub links 404ing because `Servo-Calibrator` was private, and its
+  firmware supposedly depending on two more private repos) is **resolved as
+  of 2026-08-22**: `Servo-Calibrator` and `Universal-Trajectory-Interface`
+  are both public now, and it turned out the firmware never had a real
+  `Universal-Motor-Interface` dependency to begin with (self-contained
+  reimplementation, not an actual include — see that repo's own `CLAUDE.md`).
+  `Universal-Motor-Interface` itself is still private, but nothing on this
+  page links to it. See the dated entry below for the tool-page content
+  itself moving to a `toolPages` collection, same mechanism as articles.
 - **Free SEO pass** — `@astrojs/sitemap`, `public/robots.txt`,
   `public/og-image.png` (1200×630, rendered from `og-image.svg` via `sharp`,
   not checked into source — regenerate from the SVG if it ever needs to
@@ -142,12 +144,13 @@ array at the top of `content.config.ts` — `{ id, repo: 'owner/name', path:
 
 **Auth**: needs `GITHUB_CONTENT_TOKEN` (see `.env.example`) — a
 fine-grained GitHub PAT, `Contents: Read-only`, scoped to just the repos
-listed in `articleSources`. Not set yet in this environment or in Vercel as
-of this writing; the user should create one when ready to actually publish
-a fetched article (matches the "manual deploy" preference — nothing here
-auto-triggers a rebuild when a project repo's `article.md` changes, so
-publishing is: flip `draft: false` in the project repo, then trigger a
-redeploy here yourself, whenever you're ready). **Missing token or a failed
+listed in `articleSources`. Set in Vercel's Environment Variables as of the
+first published GitHub-sourced article; not present in this local
+environment's `.env` though — use a temporary `gh auth token` for local
+build verification instead (never commit it). Nothing here auto-triggers a
+rebuild when a project repo's `article.md` changes, so publishing is: flip
+`draft: false` in the project repo, then trigger a redeploy here yourself,
+whenever you're ready. **Missing token or a failed
 fetch is non-fatal** — the loader logs a warning (`[github-articles-loader]`
 in the build output) and skips that source, so the rest of the site still
 builds. Verified end-to-end in this session using a temporary local token
@@ -157,6 +160,54 @@ correctly fetches, parses frontmatter, and renders Servo-Calibrator's
 both `/articles/` and its own route until flipped.
 
 **First real instance**: Servo-Calibrator's `article.md` (`id:
-'your-servo-is-lying-to-you'`), replacing the old locally-authored
+'hobby-servo-calibration'` — this entry originally said
+`'your-servo-is-lying-to-you'`, the id's name before a later rename; fixed
+here to match `content.config.ts`, since a future session copying the old
+id would silently 404), replacing the old locally-authored
 `servo-calibration.md` (removed this session — treat that content as
 superseded, not lost; it's still in git history if ever needed).
+
+## Tool landing pages fetched from each tool's own repo too, and a website/ folder convention (2026-08-22)
+
+Same idea as the articles entry above, applied to `/tools/`: a tool's
+landing-page content (what used to be hand-authored in
+`src/pages/tools/<slug>/index.astro`) now lives in that tool's own project
+repo (`website/tool.md`) and is pulled in at build time, same
+`githubArticlesLoader` mechanism, a new `toolPages` collection. A generic
+`src/pages/tools/[slug]/index.astro` supplies only the chrome that's the
+same for every tool — back-link, tag row/status badge from frontmatter,
+the rendered body, then a fixed Launch/GitHub button row (the launch path
+is always `/tools/<slug>/app/`, so it doesn't need to come from
+frontmatter). `src/pages/tools/index.astro` now lists from `toolPages`
+instead of a hardcoded array. Schema: `title`, `description`, `tags`,
+`status` (`active`/`shipped`/`archived`), `repo` (GitHub URL for the "View
+on GitHub" button), `draft`.
+
+**To add another tool's landing page**: add one entry to the
+`toolPageSources` array in `content.config.ts` — `{ id, repo: 'owner/name',
+path: 'website/tool.md' }`. The `id` doubles as the route slug and the
+`/tools/<id>/app/` launch target, so it must match the corresponding
+`toolAppSources` entry's `slug`.
+
+**Also standardized, same session**: every GitHub-sourced path
+(`articleSources`, `articleDataSources`, `toolPageSources`,
+`toolAppSources`) now reads from one `website/` folder per project repo
+(`website/article.md`, `website/data.md`, `website/tool.md`,
+`website/app.html`, `website/images/*`) instead of loose files at repo
+root — this is now the convention for every future project repo the site
+pulls from, decided specifically so the Tools section wouldn't keep
+cluttering each project's root as more tool-related files get added.
+Applied retroactively to Servo-Calibrator (which also renamed
+`ServoCalibrator.html` → `website/app.html` — generic, not tool-specific,
+so `toolAppSources` never needs a bespoke filename per tool) and
+Universal-Trajectory-Interface (`article.md` → `website/article.md`) via
+each repo's own `reorganize-website-folder` branch/PR, merged the same
+session. **The website/tool page draft-then-flip gotcha is the same as
+articles** (see "Local preview gotcha" above): flip `draft: false` in the
+*project* repo's `website/tool.md`, not here.
+
+Servo-Calibrator's `website/tool.md` is still `draft: true` as of this
+session — its content (what the tool does, wiring diagram, safety-relevant
+notes, and a "Getting the firmware to compile" section covering the
+AS5600 + Universal-Trajectory-Interface Arduino IDE library setup) is
+written and merged, but hasn't had the user's go-ahead to go live yet.
