@@ -40,8 +40,9 @@ const articleSources = [
     repo: 'vishwam-aggarwal/Universal-Trajectory-Interface',
     path: `${WEBSITE_DIR}/article.md`,
     images: [] as string[],
-    dataPath: `${WEBSITE_DIR}/data.md`,
-    dataImages: [] as string[],
+    // No dataPath: this repo has no website/data.md yet (unlike
+    // Servo-Calibrator's) -- add one back once that file actually exists
+    // upstream. See CLAUDE.md's check-site entry for why this was removed.
   },
 ];
 
