@@ -50,8 +50,21 @@ export async function fetchGithubFile(repo: string, filePath: string, token: str
   if (!res.ok) {
     throw new Error(`${res.status} ${res.statusText}`);
   }
-  const json = (await res.json()) as { content: string; encoding: string };
-  return Buffer.from(json.content, json.encoding as BufferEncoding);
+  const json = (await res.json()) as { content: string; encoding: string; size?: number };
+  // The Contents API only inlines base64 `content` for files under 1 MB.
+  // Past that it still answers 200, but with an empty content string and
+  // encoding "none" -- which this would happily decode into a silent
+  // 0-byte file rather than an error. That never came up while only
+  // markdown and small PNGs went through here; it matters now that tool
+  // apps can carry build artifacts (a WASM bundle, a firmware hex)
+  // alongside their HTML, which are the things likely to grow.
+  if (json.encoding !== 'base64') {
+    throw new Error(
+      `unexpected encoding "${json.encoding}" (size ${json.size ?? 'unknown'} bytes) -- ` +
+        'the Contents API does not return files over 1 MB inline'
+    );
+  }
+  return Buffer.from(json.content, 'base64');
 }
 
 export function githubArticlesLoader(sources: ArticleSource[]): Loader {
