@@ -84,11 +84,20 @@ const toolAppSources = [
     slug: 'trajectory-lab',
     repo: 'vishwam-aggarwal/Universal-Trajectory-Interface',
     path: `${WEBSITE_DIR}/app.html`,
-    // The trajectory math itself, compiled from that repo's own C++ to
-    // WebAssembly, so the page runs the real library rather than a
-    // JavaScript re-derivation of the same equations. Generated and
-    // committed there; see its wasm/README.md.
-    assets: [`${WEBSITE_DIR}/app/uti.js`],
+    assets: [
+      // The trajectory math itself, compiled from that repo's own C++ to
+      // WebAssembly, so the page runs the real library rather than a
+      // JavaScript re-derivation of the same equations. Generated and
+      // committed there; see its wasm/README.md.
+      `${WEBSITE_DIR}/app/uti.js`,
+      // STK500v1 over Web Serial, so the page can flash the sketch below
+      // onto a visitor's own Arduino. Vendored (MIT) in that repo.
+      `${WEBSITE_DIR}/app/avrbro.umd.js`,
+      // The precompiled firmware that gets flashed. One image covers Uno
+      // and both Nano bootloaders -- same ATmega328P, and only the
+      // uploader settings differ.
+      `${WEBSITE_DIR}/app/webservodemo-atmega328p.hex`,
+    ],
   },
 ];
 
